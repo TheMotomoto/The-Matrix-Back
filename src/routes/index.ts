@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
+import { helloRoutes } from '../routes/hello.js';
 // Ejemplo al importar una ruta
-import { helloRoutes } from '@/routes/hello.js';
 import { websocketRoutes } from './websocket.js';
 
 export async function registerRoutes(server: FastifyInstance): Promise<void> {

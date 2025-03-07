@@ -1,6 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import { WebSocket } from 'ws';
-import { websocketController } from '@/controllers/websocket.js';
+import { websocketController } from '../controllers/websocket.js';
 
 export async function websocketRoutes(fastify: FastifyInstance): Promise<void> {
   // Ruta básica para WebSocket

@@ -15,10 +15,7 @@
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
   },
-  "include": ["src/*","src/**/*", "test/**/*"],
+  "include": ["src/*", "src/**/*", "test/**/*"],
   "exclude": ["node_modules", "dist"]
 }
