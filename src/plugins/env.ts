@@ -1,9 +1,7 @@
-import type { FastifyInstance } from 'fastify';
 import fastifyEnv from '@fastify/env';
-import { Type } from '@fastify/type-provider-typebox';
 import { config } from 'dotenv';
+import type { FastifyInstance } from 'fastify';
 
-// Pre-cargar .env para asegurar que las variables estén disponibles durante el arranque
 config();
 
 const schema = {
@@ -12,36 +10,36 @@ const schema = {
   properties: {
     PORT: {
       type: 'string',
-      default: '3000'
+      default: '3000',
     },
     HOST: {
       type: 'string',
-      default: '0.0.0.0'
+      default: '0.0.0.0',
     },
     NODE_ENV: {
       type: 'string',
-      default: 'development'
+      default: 'development',
     },
     JWT_SECRET: {
       type: 'string',
-      default: 'supersecretkey'
+      default: 'supersecretkey',
     },
     CORS_ORIGIN: {
       type: 'string',
-      default: '*'
+      default: '*',
     },
     LOG_LEVEL: {
       type: 'string',
-      default: 'info'
-    }
-  }
+      default: 'info',
+    },
+  },
 };
 
 export const envOptions = {
   confKey: 'config',
   schema: schema,
   dotenv: true,
-  data: process.env
+  data: process.env,
 };
 
 export async function configureEnv(server: FastifyInstance): Promise<void> {

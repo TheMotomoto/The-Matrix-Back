@@ -1,5 +1,5 @@
-import type { FastifyInstance } from 'fastify';
 import { Type } from '@fastify/type-provider-typebox';
+import type { FastifyInstance } from 'fastify';
 import { hello } from '../controllers/hello.js';
 
 export async function helloRoutes(fastify: FastifyInstance): Promise<void> {

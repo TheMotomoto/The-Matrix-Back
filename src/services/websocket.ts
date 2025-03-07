@@ -14,7 +14,7 @@ export const websocketService = {
   // Registrar una nueva conexión
   registerConnection: (userId: string, socket: WebSocket): void => {
     connections.set(userId, socket);
-    
+
     // Notificar a todos los usuarios que alguien se ha conectado
     websocketService.broadcastSystemMessage(`Usuario ${userId} se ha conectado`);
   },
@@ -22,7 +22,7 @@ export const websocketService = {
   // Remover una conexión
   removeConnection: (userId: string): void => {
     connections.delete(userId);
-    
+
     // Notificar a todos los usuarios que alguien se ha desconectado
     websocketService.broadcastSystemMessage(`Usuario ${userId} se ha desconectado`);
   },
@@ -32,11 +32,11 @@ export const websocketService = {
     const formattedMessage = {
       ...messageData,
       sender: senderId,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     const messageStr = JSON.stringify(formattedMessage);
-    
+
     // Enviar a todos los clientes conectados
     connections.forEach((socket, _userId) => {
       if (socket.readyState === WebSocket.OPEN) {
@@ -50,15 +50,15 @@ export const websocketService = {
     const systemMessage = {
       type: 'system',
       message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     const messageStr = JSON.stringify(systemMessage);
-    
-    for(const socket of connections.values()) {
-        if (socket.readyState === WebSocket.OPEN) {
-            socket.send(messageStr);
-        }
+
+    for (const socket of connections.values()) {
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(messageStr);
+      }
     }
   },
 
@@ -66,7 +66,7 @@ export const websocketService = {
   getStats: () => {
     return {
       activeConnections: connections.size,
-      connectionIds: Array.from(connections.keys())
+      connectionIds: Array.from(connections.keys()),
     };
-  }
+  },
 };
