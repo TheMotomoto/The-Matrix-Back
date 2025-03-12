@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import { helloRoutes } from '../routes/hello.js';
+import { helloRoutes } from './hello.js';
 // Ejemplo al importar una ruta
 import { websocketRoutes } from './websocket.js';
 

@@ -1,7 +1,7 @@
 import type { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import Fastify from 'fastify';
 import { registerPlugins } from './plugins/index.js';
-import { registerRoutes } from './routes/index.js';
+import { registerRoutes } from './routes/rest.js';
 
 // Crear instancia de Fastify con TypeBox
 const server = Fastify({
