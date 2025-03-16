@@ -1,3 +1,4 @@
+import type AsyncQueueInterface from 'src/utils/AsyncQueueInterface.js';
 import type { MatchDetails } from '../../../schemas/zod.js';
 import AsyncQueue from '../../../utils/AsyncQueue.js';
 import type WebSocketService from '../../WebSocketServiceImpl.js';
@@ -8,17 +9,22 @@ import GameServiceImpl from '../../game/services/GameServiceImpl.js';
 import type MatchMakingInterface from '../../lobbies/services/MatchMakingService.js';
 class MatchMaking implements MatchMakingInterface {
   // Matchmaking queue
-  private queue: AsyncQueue<Player>;
+  private queue: AsyncQueueInterface<Player>;
   // Queue of matches (matches in progress) Should be shared between
-  private static instance: MatchMaking;
   // Game service (the logic of the game)
   private gameService: GameService;
   private webSocketService: WebSocketService;
 
+  // Singleton instance
+  private static instance: MatchMaking;
   private constructor(webSocketService: WebSocketService) {
     this.queue = new AsyncQueue<Player>();
     this.gameService = GameServiceImpl.getInstance(); // Manual dependency injection
     this.webSocketService = webSocketService;
+  }
+  public static getInstance(webSocketService: WebSocketService): MatchMaking {
+    if (!MatchMaking.instance) MatchMaking.instance = new MatchMaking(webSocketService);
+    return MatchMaking.instance;
   }
 
   // TODO Implement logic of different matches types (difficulties, maps, etc)
@@ -47,11 +53,6 @@ class MatchMaking implements MatchMakingInterface {
 
   public cancelMatchMaking(_userId: Player): void {
     throw new Error('Method not implemented.');
-  }
-
-  public static getInstance(webSocketService: WebSocketService): MatchMaking {
-    if (!MatchMaking.instance) MatchMaking.instance = new MatchMaking(webSocketService);
-    return MatchMaking.instance;
   }
 
   private async enqueue(player: Player): Promise<void> {

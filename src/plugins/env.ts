@@ -48,7 +48,7 @@ export async function configureEnv(server: FastifyInstance): Promise<void> {
 
 // Definir tipos importados
 export type EnvConfig = {
-  PORT: string;
+  PORT: number;
   HOST: string;
   NODE_ENV: string;
   JWT_SECRET: string;

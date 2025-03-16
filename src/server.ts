@@ -1,13 +1,15 @@
 import type { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import Fastify from 'fastify';
+import { envOptions } from './plugins/env.js';
 import { registerPlugins } from './plugins/index.js';
-import { registerRoutes } from './routes/rest.js';
-
+import { registerRoutes } from './routes/register.js';
 // Crear instancia de Fastify con TypeBox
 const server = Fastify({
   logger: {
-    level: process.env.LOG_LEVEL || 'info',
-    transport: process.env.NODE_ENV === 'development' ? { target: 'pino-pretty' } : undefined,
+    level: envOptions.schema.properties.LOG_LEVEL.default,
+    transport: envOptions.schema.properties.LOG_LEVEL.default
+      ? { target: 'pino-pretty' }
+      : undefined,
   },
 }).withTypeProvider<TypeBoxTypeProvider>();
 // Registrar plugins
@@ -19,8 +21,9 @@ await registerRoutes(server);
 // Iniciar
 const start = async () => {
   try {
-    const port = process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000;
-    await server.listen({ port, host: '0.0.0.0' });
+    const port = server.config.PORT;
+    const host = server.config.HOST;
+    await server.listen({ port, host });
   } catch (err) {
     server.log.error(err);
     process.exit(1);
