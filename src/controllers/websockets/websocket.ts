@@ -1,6 +1,9 @@
 import type { FastifyRequest } from 'fastify';
 import type { WebSocket } from 'ws';
-import { websocketService } from '../services/websocket.js';
+import WebsocketService from '../../app/WebSocketServiceImpl.js';
+import { validateString } from '../../schemas/zod.js';
+
+const websocketService = WebsocketService.getInstance();
 
 export const websocketController = {
   // Manejador para conexiones de eco simple
@@ -48,9 +51,33 @@ export const websocketController = {
       }
     });
 
-    // Limpiar recursos cuando la conexión se cierre
     socket.on('close', () => {
       websocketService.removeConnection(userId);
     });
+  },
+
+  handleMatchMaking: (socket: WebSocket, request: FastifyRequest) => {
+    const { userId, message } = request.query as { userId?: string; message?: string };
+    const userIdParsed = validateString(userId);
+    websocketService.registerConnection(userIdParsed, socket);
+    socket.send('Connected and looking for a match...');
+
+    websocketService.matchMaking(userIdParsed, message);
+
+    // Handle incoming messages
+    socket.on('message', (_message: Buffer) => {
+      socket.send('Matchmaking in progress...');
+    });
+
+    socket.on('close', () => {
+      // Clean resources when the connection is closed
+      websocketService.removeConnection(userIdParsed);
+    });
+  },
+
+  // Game handler
+  handleGameConnection: (_socket: WebSocket, _request: FastifyRequest) => {
+    // TODO: Implementar
+    // Here we should implement the game logic, for example, the game loop, the game state, the game rules, etc.
   },
 };

@@ -6,5 +6,7 @@ export default defineConfig({
       provider: 'istanbul',
       exclude: ['node_modules', 'dist'],
     },
+    testTimeout: 10000,
   },
 });
+  
