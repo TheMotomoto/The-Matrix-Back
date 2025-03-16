@@ -1,7 +1,7 @@
 import type { FastifyRequest } from 'fastify';
 import type { WebSocket } from 'ws';
-import { validateString } from '../../plugins/zod.js';
-import WebsocketService from '../../services/impl/WebSocketService.js';
+import { validateString } from '../../schemas/zod.js';
+import WebsocketService from '../../app/WebSocketServiceImpl.js';
 
 const websocketService = WebsocketService.getInstance();
 

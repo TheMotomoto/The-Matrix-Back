@@ -1,7 +1,7 @@
-import type { MatchDetails } from '../../plugins/zod.js';
-import AsyncQueue from '../../utils/AsyncQueue.js';
-import Match from '../game/Match.js';
-import type GameService from '../interfaces/GameService.js';
+import type { MatchDetails } from '../../../schemas/zod.js';
+import AsyncQueue from '../../../utils/AsyncQueue.js';
+import Match from '../../game/match/Match.js';
+import type GameService from '../../game/services/GameService.js';
 
 class GameServiceImpl implements GameService {
   private matches: AsyncQueue<Match>;

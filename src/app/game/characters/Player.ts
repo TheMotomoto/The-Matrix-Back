@@ -1,6 +1,6 @@
 //import PlayerError from 'src/services/impl/PlayerError.js';
-import PlayerError from '../../impl/PlayerError.js';
-import type Cell from '../CellBoard.js';
+import PlayerError from '../../errors/PlayerError.js';
+import type Cell from '../match/CellBoard.js';
 import Character from './Character.js';
 
 /**

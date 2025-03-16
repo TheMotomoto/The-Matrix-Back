@@ -1,6 +1,6 @@
 import type { FastifyRequest } from 'fastify';
 import type { WebSocket } from 'ws';
-import WebsocketService from '../../services/impl/WebSocketService.js';
+import WebsocketService from '../../app/WebSocketServiceImpl.js';
 
 export default class MatchMakingController {
   private websocketService: WebsocketService = WebsocketService.getInstance();

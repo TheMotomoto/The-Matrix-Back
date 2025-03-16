@@ -1,5 +1,4 @@
-import type { MatchDetails } from 'src/plugins/zod.js';
-import type WebSocketService from '../impl/WebSocketService.js';
+import type { MatchDetails } from 'src/schemas/zod.js';
 
 interface MatchMakingService {
   searchMatch: (playerId: string, match: MatchDetails) => Promise<void>;

@@ -1,4 +1,4 @@
-import type Character from './characters/Character.js';
+import type Character from '../characters/Character.js';
 
 /**
  * The responsability of this class is to represent

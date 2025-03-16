@@ -1,4 +1,3 @@
-import type Match from 'src/services/game/Match.js';
 import { z } from 'zod';
 
 function validateMatchDetails(data: unknown): MatchDetails {

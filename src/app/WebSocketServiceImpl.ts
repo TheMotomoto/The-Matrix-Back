@@ -1,8 +1,8 @@
 import { WebSocket } from 'ws';
-import { type MatchDetails, validateMatchDetails } from '../../plugins/zod.js';
-import type Match from '../game/Match.js';
-import type MatchMakingService from '../interfaces/MatchMakingService.js';
-import MatchMaking from './Matchmaking.js';
+import { type MatchDetails, validateMatchDetails } from '../schemas/zod.js';
+import type Match from './game/match/Match.js';
+import type MatchMakingService from './lobbies/services/MatchMakingService.js';
+import MatchMaking from './lobbies/services/MatchmakingImpl.js';
 interface ChatMessage {
   type: string;
   message: string;
@@ -11,6 +11,10 @@ interface ChatMessage {
 
 // Almacén de conexiones activas // TODO cambiar a una base de datos (Redis)
 
+/**
+ * This class is responsible for managing WebSocket connections and handling messages.
+ * It also provides matchmaking services for players looking for a match.
+ */
 export default class WebsocketService {
   private static instance: WebsocketService;
 
