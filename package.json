@@ -2,11 +2,11 @@
   "name": "bad-ice-cream",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/server.js",
+  "main": "dist/src/server.js",
   "type": "module",
   "scripts": {
     "dev": "nodemon",
-    "start": "node dist/server.js",
+    "start": "node dist/src/server.js",
     "build": "tsc",
     "lint": "biome lint src/ ",
     "format": "biome format --write src/ ",

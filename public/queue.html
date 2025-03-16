@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+    <!--Completly generated with IA :) jsjsjjs-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bad Ice Cream - Queue View</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #chatBox {
+            height: 400px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+        }
+        .user-message {
+            background-color: #e6f7ff;
+            text-align: right;
+        }
+        .other-message {
+            background-color: #f2f2f2;
+        }
+        .system-message {
+            background-color: #ffffcc;
+            font-style: italic;
+        }
+        .error-message {
+            background-color: #ffcccc;
+            color: #cc0000;
+        }
+        .message-meta {
+            font-size: 0.8em;
+            color: #666;
+        }
+        #messageForm {
+            display: flex;
+        }
+        #messageInput {
+            flex-grow: 1;
+            padding: 8px;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>  
+    <h1>Cola de Juego en tiempo real</h1>
+    <div id="status">Estado: Desconectado</div>
+    <div id="chatBox"></div>
+    <form id="messageForm">
+        <input type="text" id="messageInput" placeholder="Escribe un mensaje..." required>
+        <button type="submit">Enviar</button>
+    </form>
+
+    <script>
+        // Generar un ID de usuario único
+        const userId = `user_${Date.now().toString(36)}${Math.random().toString(36).substr(2, 5)}`;
+        
+        // Elementos del DOM
+        const statusEl = document.getElementById('status');
+        const chatBox = document.getElementById('chatBox');
+        const messageForm = document.getElementById('messageForm');
+        const messageInput = document.getElementById('messageInput');
+        
+        // Conexión WebSocket
+        let socket;
+        
+        const connect =  () => {
+            // Cerrar conexión existente si la hay
+            if (socket) {
+                socket.close();
+            }
+            
+            // Crear nueva conexión
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const localhost = 'localhost:3000';
+            //const wsUrl = `${protocol}//${localhost}/ws/matchmaking?userId=${userId}`;
+            const matchDetails = { level: 3, map: "desert" };
+            const message = JSON.stringify(matchDetails);
+            console.log(message);
+            const wsUrl = `${protocol}//${localhost}/ws/matchmaking?userId=${userId}&message=${message}`;
+
+            
+            socket = new WebSocket(wsUrl);
+            
+            socket.onopen = () => {
+                statusEl.textContent = 'Estado: Conectado';
+                statusEl.style.color = 'green';
+                addMessage('Sistema', 'Conectado al servidor de Matchmaking', 'system');
+            };
+            
+            socket.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                   addMessage('Usuario', JSON.stringify(data), 'user');
+                } catch (error) {
+                    console.log(error)
+                    addMessage('Error', 'Error al procesar mensaje recibido', 'error');
+                }
+            };
+            
+            socket.onclose = () => {
+                statusEl.textContent = 'Estado: Desconectado';
+                statusEl.style.color = 'red';
+                addMessage('Sistema', 'Desconectado del servidor de chat', 'system');
+                
+                // Reconectar después de 5 segundos
+                setTimeout(connect, 5000);
+            };
+            
+            socket.onerror = (error) => {
+                statusEl.textContent = 'Estado: Error de conexión';
+                statusEl.style.color = 'red';
+                addMessage('Error', 'Error de conexión con el servidor', 'error');
+            };
+        }
+        
+        function addMessage(sender, message, type) {
+            const messageEl = document.createElement('div');
+            messageEl.className = `message ${type}-message`;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            
+            messageEl.innerHTML = `
+                <div>${message}</div>
+                <div class="message-meta">${sender} - ${timestamp}</div>
+            `;
+            
+            chatBox.appendChild(messageEl);
+            chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll al fondo
+        }
+        
+        // Manejar el envío de mensajes
+        messageForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                addMessage('Error', 'No estás conectado al servidor', 'error');
+                return;
+            }
+            
+            const message = messageInput.value.trim();
+            if (!message) return;
+            
+            // Enviar mensaje al servidor
+            const messageData = {
+                type: 'chat',
+                message: message
+            };
+            
+            socket.send(JSON.stringify(messageData));
+            messageInput.value = '';
+        });
+        
+        // Iniciar conexión al cargar la página
+        connect();
+    </script>
+</body>
+</html>

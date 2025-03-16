@@ -1,7 +1,9 @@
 import type { FastifyRequest } from 'fastify';
-import { validateString } from 'src/plugins/zod.js';
 import type { WebSocket } from 'ws';
-import { websocketService } from '../../services/impl/websocket.js';
+import { validateString } from '../../plugins/zod.js';
+import WebsocketService from '../../services/impl/WebSocketService.js';
+
+const websocketService = WebsocketService.getInstance();
 
 export const websocketController = {
   // Manejador para conexiones de eco simple
@@ -49,24 +51,27 @@ export const websocketController = {
       }
     });
 
-    // Limpiar recursos cuando la conexión se cierre
     socket.on('close', () => {
       websocketService.removeConnection(userId);
     });
   },
 
-  // Manejador para MatchMaking
   handleMatchMaking: (socket: WebSocket, request: FastifyRequest) => {
-    const userId = request.query as { userId?: string };
-    const userIdParsed = validateString(userId.userId);
-    socket.on('message', async (message: Buffer) => {
-      const matchId: string = await websocketService.matchMaking(userIdParsed, message);
-      // Wait for matchmaking with a thread?
-      socket.send(`The Id for your match is: ${matchId}`);
+    const { userId, message } = request.query as { userId?: string; message?: string };
+    const userIdParsed = validateString(userId);
+    websocketService.registerConnection(userIdParsed, socket);
+    socket.send('Connected and looking for a match...');
+
+    websocketService.matchMaking(userIdParsed, message);
+
+    // Handle incoming messages
+    socket.on('message', (_message: Buffer) => {
+      socket.send('Matchmaking in progress...');
     });
 
     socket.on('close', () => {
       // Clean resources when the connection is closed
+      websocketService.removeConnection(userIdParsed);
     });
   },
 

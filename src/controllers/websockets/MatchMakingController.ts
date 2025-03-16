@@ -1,14 +1,15 @@
 import type { FastifyRequest } from 'fastify';
 import type { WebSocket } from 'ws';
-import { websocketService } from '../../services/impl/websocket.js';
+import WebsocketService from '../../services/impl/WebSocketService.js';
 
-export default class LobbyController {
-  private static instance: LobbyController;
-  public static getInstance(): LobbyController {
-    if (!LobbyController.instance) {
-      LobbyController.instance = new LobbyController();
+export default class MatchMakingController {
+  private websocketService: WebsocketService = WebsocketService.getInstance();
+  private static instance: MatchMakingController;
+  public static getInstance(): MatchMakingController {
+    if (!MatchMakingController.instance) {
+      MatchMakingController.instance = new MatchMakingController();
     }
-    return LobbyController.instance;
+    return MatchMakingController.instance;
   }
 
   public handleEchoConnection(socket: WebSocket, _request: FastifyRequest) {
@@ -26,7 +27,7 @@ export default class LobbyController {
     // Registrar la conexión del usuario en el servicio
     const data = request.query as { userId?: string };
     const userId = data.userId || `user-${Date.now()}`;
-    websocketService.registerConnection(userId, socket);
+    this.websocketService.registerConnection(userId, socket);
 
     // Enviar mensaje de bienvenida
     socket.send(
@@ -41,7 +42,7 @@ export default class LobbyController {
     socket.on('message', (message: Buffer) => {
       try {
         const messageData = JSON.parse(message.toString());
-        websocketService.broadcastMessage(userId, messageData);
+        this.websocketService.broadcastMessage(userId, messageData);
       } catch (error) {
         console.error('Error al procesar mensaje:', error);
         socket.send(
@@ -56,7 +57,7 @@ export default class LobbyController {
 
     // Limpiar recursos cuando la conexión se cierre
     socket.on('close', () => {
-      websocketService.removeConnection(userId);
+      this.websocketService.removeConnection(userId);
     });
   }
 }
