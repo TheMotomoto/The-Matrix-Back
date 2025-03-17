@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { configureEnv } from './env.js';
+import { configureRedis } from './redis.js';
 import { configureStatic } from './static.js';
 import { configureWebSocket } from './websocket.js';
 // import fastifyCors from '@fastify/cors';
@@ -19,7 +20,10 @@ export async function registerPlugins(server: FastifyInstance): Promise<void> {
 
   // Configurar WebSocket
   await configureWebSocket(server);
+  // Configurar rutas
   await configureStatic(server);
+  // Configurar Redis
+  await configureRedis(server);
 
   // Aquí puedes registrar más plugins según sea necesario
 }

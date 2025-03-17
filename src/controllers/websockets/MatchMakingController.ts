@@ -20,9 +20,7 @@ export default class MatchMakingController {
     const userIdParsed = validateString(userId);
     websocketService.registerConnection(userIdParsed, socket);
     socket.send('Connected and looking for a match...');
-
     websocketService.matchMaking(userIdParsed, message);
-
     // Handle incoming messages
     socket.on('message', (_message: Buffer) => {
       socket.send('Matchmaking in progress...');

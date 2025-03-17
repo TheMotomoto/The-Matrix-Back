@@ -32,6 +32,10 @@ const schema = {
       type: 'string',
       default: 'info',
     },
+    REDIS_URL: {
+      type: 'string',
+      default: 'redis://localhost:6379', // We can run it with Docker
+    },
   },
 };
 
@@ -54,6 +58,7 @@ export type EnvConfig = {
   JWT_SECRET: string;
   CORS_ORIGIN: string;
   LOG_LEVEL: string;
+  REDIS_URL: string;
 };
 
 // Extender FastifyInstance para incluir config y poder hacer ---> fastify.config.PORT <---- por ejmplo
