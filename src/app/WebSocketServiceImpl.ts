@@ -1,5 +1,5 @@
 import { WebSocket } from 'ws';
-import { type MatchDetails, validateMatchDetails } from '../schemas/zod.js';
+import type { MatchDetails } from '../schemas/zod.js';
 import type Match from './game/match/Match.js';
 import type MatchMakingService from './lobbies/services/MatchMakingService.js';
 import MatchMaking from './lobbies/services/MatchmakingImpl.js';
@@ -54,10 +54,8 @@ export default class WebsocketService {
     }
   }
 
-  public async matchMaking(userId: string, message: string | undefined): Promise<void> {
-    const match = this.parseData(message); // Mattch Details
+  public async matchMaking(userId: string, match: MatchDetails): Promise<void> {
     console.info(`Matchmaking from ${userId}: looking for Match: ${JSON.stringify(match)}`);
-    // Poner la match en la cola de matchmaking
     this.matchMakingService.searchMatch(userId, match);
   }
 
@@ -70,14 +68,8 @@ export default class WebsocketService {
       hostSocket.send(JSON.stringify({ message: 'match-found', matchId, match }));
       guestSocket.send(JSON.stringify({ message: 'match-found', matchId, match }));
     } else {
-      // TODO --> implement reconnect logic
-      throw new Error('One of the players is not connected'); // TODO --> Should handle the exception if a player disconnects
+      // TODO --> implement reconnect logic // Priority 2 NOT MVP
+      throw new Error('One of the players is not connected');
     }
-  }
-
-  private parseData(message: string | undefined): MatchDetails {
-    if (message === undefined) throw new Error('Message is undefined');
-    const matchRaw = JSON.parse(message);
-    return validateMatchDetails(matchRaw);
   }
 }

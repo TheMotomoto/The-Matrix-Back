@@ -1,11 +1,21 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import MatchMakingController from '../../src/controllers/websockets/MatchMakingController.js'; 
 import WebsocketService from '../../src/app/WebSocketServiceImpl.js';
-import { validateString } from '../../src/schemas/zod.js';
+import { validateString, validateMatchDetails } from '../../src/schemas/zod.js';
 import type { FastifyRequest } from 'fastify';
 import type { WebSocket } from 'ws';
 
 // Mock dependencies
+vi.mock('../../src/server.js', () => {
+    return {
+        logger: {
+            info: vi.fn(),
+            warn: vi.fn(),
+            error: vi.fn(),
+        },
+    };
+});
+
 vi.mock('../../src/app/WebSocketServiceImpl.js', () => {
     const mockInstance = {
         registerConnection: vi.fn(),
@@ -22,7 +32,20 @@ vi.mock('../../src/app/WebSocketServiceImpl.js', () => {
 
 vi.mock('../../src/schemas/zod.js', () => ({
     validateString: vi.fn(input => input),
+    validateMatchDetails: vi.fn(input => input),
 }));
+
+vi.mock('../../src/controllers/websockets/WebSocketError.js', () => {
+    return {
+        default: class WebSocketError extends Error {
+            static BAD_WEB_SOCKET_REQUEST = 'Bad WebSocket Request';
+            constructor(message: string) {
+                super(message);
+                this.name = 'WebSocketError';
+            }
+        }
+    };
+});
 
 describe('MatchMakingController', () => {
     const mockWebSocketService = WebsocketService.getInstance() as unknown as {
@@ -31,11 +54,10 @@ describe('MatchMakingController', () => {
         removeConnection: ReturnType<typeof vi.fn>;
     };
     
-    // Definir un tipo para nuestro mock de WebSocket con las funciones mockeadas de vi
     type MockWebSocket = {
         send: ReturnType<typeof vi.fn>;
         on: ReturnType<typeof vi.fn>;
-        // Añadir otros métodos según sea necesario
+        close: ReturnType<typeof vi.fn>;
     };
     
     let mockSocket: MockWebSocket;
@@ -43,17 +65,19 @@ describe('MatchMakingController', () => {
     let messageHandler: ((message: Buffer) => void) | undefined;
     let closeHandler: (() => void) | undefined;
     
+    const validMatchDetails = { gameMode: 'solo', difficulty: 'easy', map: 'forest' };
+    
     beforeEach(() => {
         vi.clearAllMocks();
         
-        // Crear manejadores específicos que podemos almacenar para usarlos después
+        // Handlers we can store for later use
         messageHandler = undefined;
         closeHandler = undefined;
         
-        // Crear un mock más explícito
+        // Create mock WebSocket
         mockSocket = {
             send: vi.fn(),
-            on: vi.fn((event: string, handler: ((message: Buffer) => void) | (() => void)) => {
+            on: vi.fn((event: string, handler: (data?: Buffer | Error) => void) => {
                 if (event === 'message') {
                     messageHandler = handler as (message: Buffer) => void;
                 } else if (event === 'close') {
@@ -61,10 +85,15 @@ describe('MatchMakingController', () => {
                 }
                 return mockSocket as unknown as WebSocket;
             }),
+            close: vi.fn(),
         };
         
+        // Create mock request with valid message JSON
         mockRequest = {
-            query: { userId: 'user123', message: 'hello' }
+            query: { 
+                userId: 'user123', 
+                message: JSON.stringify(validMatchDetails)
+            }
         } as unknown as FastifyRequest;
     });
 
@@ -81,19 +110,20 @@ describe('MatchMakingController', () => {
     });
 
     describe('handleMatchMaking', () => {
-        it('should register connection with validated userId', () => {
+        it('should register connection with validated userId and match details', () => {
             // Act
             const controller = MatchMakingController.getInstance();
             controller.handleMatchMaking(mockSocket as unknown as WebSocket, mockRequest);
 
             // Assert
             expect(validateString).toHaveBeenCalledWith('user123');
+            expect(validateMatchDetails).toHaveBeenCalledWith(validMatchDetails);
             expect(mockWebSocketService.registerConnection).toHaveBeenCalledWith('user123', mockSocket);
             expect(mockSocket.send).toHaveBeenCalledWith('Connected and looking for a match...');
-            expect(mockWebSocketService.matchMaking).toHaveBeenCalledWith('user123', 'hello');
+            expect(mockWebSocketService.matchMaking).toHaveBeenCalledWith('user123', validMatchDetails);
         });
 
-        it('should work when message is not provided', () => {
+        it('should throw error when message is not provided', () => {
             // Arrange
             mockRequest.query = { userId: 'user123' };
             
@@ -102,7 +132,8 @@ describe('MatchMakingController', () => {
             controller.handleMatchMaking(mockSocket as unknown as WebSocket, mockRequest);
 
             // Assert
-            expect(mockWebSocketService.matchMaking).toHaveBeenCalledWith('user123', undefined);
+            expect(mockSocket.send).toHaveBeenCalledWith('Internal server error');
+            expect(mockSocket.close).toHaveBeenCalled();
         });
 
         it('should set up message event listener that responds accordingly', () => {
@@ -137,6 +168,31 @@ describe('MatchMakingController', () => {
             } else {
                 throw new Error('Close handler not registered');
             }
+        });
+
+        it('should set up error event listener', () => {
+            // Act
+            const controller = MatchMakingController.getInstance();
+            controller.handleMatchMaking(mockSocket as unknown as WebSocket, mockRequest);
+            
+            // Assert
+            expect(mockSocket.on).toHaveBeenCalledWith('error', expect.any(Function));
+        });
+
+        it('should handle JSON parsing errors', () => {
+            // Arrange
+            mockRequest.query = { 
+                userId: 'user123', 
+                message: 'invalid-json' 
+            };
+            
+            // Act
+            const controller = MatchMakingController.getInstance();
+            controller.handleMatchMaking(mockSocket as unknown as WebSocket, mockRequest);
+
+            // Assert
+            expect(mockSocket.send).toHaveBeenCalledWith('Internal server error');
+            expect(mockSocket.close).toHaveBeenCalled();
         });
     });
 });

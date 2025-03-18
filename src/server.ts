@@ -42,3 +42,6 @@ process.on('SIGTERM', () => closeGracefully('SIGTERM'));
 
 // Iniciar el servidor
 start();
+
+// Instead of console.log, use server logger.
+export const logger = server.log;

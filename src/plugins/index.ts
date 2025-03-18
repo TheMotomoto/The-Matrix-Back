@@ -1,14 +1,16 @@
 import type { FastifyInstance } from 'fastify';
 import { configureEnv } from './env.js';
+import { handleError } from './errorsHandler.js';
 import { configureRedis } from './redis.js';
 import { configureStatic } from './static.js';
 import { configureWebSocket } from './websocket.js';
 // import fastifyCors from '@fastify/cors';
 
 export async function registerPlugins(server: FastifyInstance): Promise<void> {
-  // Cargar variables de entorno primero
+  // Set up environment variables
   await configureEnv(server);
-
+  // Set up error handler
+  server.setErrorHandler(handleError);
   // Configurar CORS
   //await server.register(fastifyCors, {
   //  origin: server.config.CORS_ORIGIN === '*'
@@ -17,12 +19,11 @@ export async function registerPlugins(server: FastifyInstance): Promise<void> {
   //  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   //  credentials: true
   //});
-
-  // Configurar WebSocket
+  // Set up WebSocket
   await configureWebSocket(server);
-  // Configurar rutas
+  // Set up static files
   await configureStatic(server);
-  // Configurar Redis
+  // Set up Redis
   await configureRedis(server);
 
   // Aquí puedes registrar más plugins según sea necesario

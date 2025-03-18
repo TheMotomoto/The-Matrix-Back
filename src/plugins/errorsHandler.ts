@@ -1,3 +1,8 @@
+import type { FastifyReply, FastifyRequest } from 'fastify';
+import { ZodError } from 'zod';
+import PlayerError from '../app/errors/PlayerError.js';
+import { logger } from '../server.js';
+
 export class AppError extends Error {
   statusCode: number;
   isOperational: boolean;
@@ -11,18 +16,29 @@ export class AppError extends Error {
   }
 }
 
-export const handleError = (
-  error: Error | AppError
-): {
-  statusCode: number;
-  message: string;
-  stack?: string;
-} => {
+export const handleError = (error: unknown, _request: FastifyRequest, response: FastifyReply) => {
   // Aqui pal manejo de errores
+  logger.warn('An error occurred...');
+  logger.error(error);
+  if (error instanceof AppError || error instanceof Error) {
+    return response.status(500).send({
+      statusCode: 500,
+      message: 'Something went wrong',
+    });
+  }
 
-  return {
-    statusCode: 500,
-    message: 'Something went wrong',
-    ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
-  };
+  if (error instanceof ZodError) {
+    return response.status(500).send({
+      statusCode: 500,
+      message: 'Something went wrong',
+    });
+  }
+
+  // An error from customized error class
+  if (error instanceof PlayerError) {
+    return response.status(500).send({
+      statusCode: 500,
+      message: 'Something went wrong',
+    });
+  }
 };
