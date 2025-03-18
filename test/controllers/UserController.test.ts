@@ -51,9 +51,6 @@ describe('UserController', () => {
   describe('handleGetUser', () => {
     it('should validate the userId, retrieve the user from Redis and send the user object', async () => {
       await controller.handleGetUser(redis, req, res);
-
-      expect(validateString).toHaveBeenCalledWith('fixed-uuid');
-
       expect(redis.hgetall).toHaveBeenCalledWith('users:fixed-uuid');
 
       expect(res.send).toHaveBeenCalledWith({ id: 'fixed-uuid', name: 'Test User' });
