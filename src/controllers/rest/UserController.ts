@@ -1,7 +1,7 @@
 import type { FastifyRedis } from '@fastify/redis';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { validateString } from '../../schemas/zod.js';
 import { v4 as uuidv4 } from 'uuid';
+import { validateString } from '../../schemas/zod.js';
 
 export default class UserController {
   // Singleton

@@ -3,7 +3,6 @@ import type { FastifyRequest, FastifyReply } from 'fastify';
 import type { FastifyRedis } from '@fastify/redis';
 import UserController from '../../src/controllers/rest/UserController.js';
 import { v4 as uuidv4 } from 'uuid';
-import { validateString } from 'src/schemas/zod.js';
 vi.mock('uuid', () => ({
   v4: vi.fn(() => 'fixed-uuid'),
 }));
