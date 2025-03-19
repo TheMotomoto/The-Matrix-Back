@@ -23,5 +23,9 @@ class Match {
   public getGuest(): string {
     return this.guest;
   }
+
+  public async start(): Promise<void>{
+    
+  }
 }
 export default Match;

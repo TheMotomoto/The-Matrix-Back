@@ -1,15 +1,22 @@
-//import PlayerError from 'src/services/impl/PlayerError.js';
-import PlayerError from '../../errors/PlayerError.js';
-import type Cell from '../match/CellBoard.js';
-import Character from './Character.js';
+import PlayerError from '../../../errors/PlayerError.js';
+import type Cell from '../../match/boards/CellBoard.js';
+import Character from '../Character.js';
 
 /**
  * This class represents the behaviour and the properties
  * of a player in the game of bad-ice-cream.
  */
 class Player extends Character {
+  execPower(): void {
+    throw new Error('Method not implemented.');
+  }
+  die(): void {
+    throw new Error('Method not implemented.');
+  }
+  reborn(): void {
+    throw new Error('Method not implemented.');
+  }
   private id: string;
-  private cell: Cell | null;
 
   /**
    * This method returns the id of the player
@@ -24,8 +31,8 @@ class Player extends Character {
    * @param id {string} The id of the player
    * @param cell {Cell} the cell where the player is located
    */
-  constructor(id: string, cell: Cell | null) {
-    super();
+  constructor(id: string, cell: Cell) {
+    super(cell);
     this.id = id;
     this.cell = cell;
   }

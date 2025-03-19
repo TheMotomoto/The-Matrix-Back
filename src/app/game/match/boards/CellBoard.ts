@@ -1,0 +1,63 @@
+import type { BoardItem } from './BoardItem.js';
+
+/**
+ * The responsability of this class is to represent
+ * the behaviour and properties of a cell in the game.
+ */
+class Cell {
+  private xPosition: number;
+  private yPosition: number;
+  private item: BoardItem | null = null;
+  private up: Cell | null = null;
+  private down: Cell | null = null;
+  private left: Cell | null = null;
+  private right: Cell | null = null;
+
+  public getUpCell(): Cell | null {
+    return this.up;
+  }
+
+  public getDownCell(): Cell | null {
+    return this.down;
+  }
+  
+  public getfLeftCell(): Cell | null {
+    return this.left;
+  }
+
+  public getRightCell(): Cell | null {
+    return this.right;
+  }
+
+
+  /**
+   * Method to create a new cell
+   * @param x {number} The x position of the cell
+   * @param y {number} The y position of the cell
+   */
+  constructor(x: number, y: number, cellUp:Cell|null, cellDown:Cell|null, cellLeft:Cell|null, cellRight:Cell|null) {
+    this.xPosition = x;
+    this.yPosition = y;
+    this.up = cellUp;
+    this.down = cellDown;
+    this.left = cellLeft;
+    this.right = cellRight;
+  }
+
+  /**
+   * This method returns the coordinates of the cell.
+   * @returns {x: number, y: number} The coordinates of the cell
+   */
+  public getCoordinates(): { x: number; y: number } {
+    return { x: this.xPosition, y: this.yPosition };
+  }
+
+  public setCharacter(item: BoardItem): void {
+    this.item = item;
+  }
+
+  public getCharacter(): BoardItem | null {
+    return this.item;
+  }
+}
+export default Cell;
