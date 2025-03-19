@@ -27,7 +27,7 @@ class MatchMaking implements MatchMakingInterface {
     return MatchMaking.instance;
   }
 
-  // TODO Implement logic of different matches types (difficulties, maps, etc)
+  // TODO -- Priority 3 --> Implement logic of different matches types (difficulties, maps, etc)
   public async searchMatch(playerId: string, matchDetails: MatchDetails): Promise<void> {
     const player = await this.queue.dequeue(); // Esperamos a que la promesa de dequeue se resuelva
 
@@ -43,20 +43,8 @@ class MatchMaking implements MatchMakingInterface {
     }
   }
 
-  public startMatchMaking(_userId: Player): void {
-    throw new Error('Method not implemented.');
-  }
-
   public cancelMatchMaking(_userId: Player): void {
     throw new Error('Method not implemented.');
-  }
-
-  private async enqueue(player: Player): Promise<void> {
-    await this.queue.enqueue(player);
-  }
-
-  private async dequeue(): Promise<Player | undefined> {
-    return await this.queue.dequeue();
   }
 
   private createMatch(host: string, guest: string, match: MatchDetails): Match {

@@ -45,3 +45,5 @@ start();
 
 // Instead of console.log, use server logger.
 export const logger = server.log;
+// Instead of redis, use server redis.
+export const redis = server.redis;
