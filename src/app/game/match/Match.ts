@@ -24,8 +24,6 @@ class Match {
     return this.guest;
   }
 
-  public async start(): Promise<void>{
-    
-  }
+  public async start(): Promise<void> {}
 }
 export default Match;

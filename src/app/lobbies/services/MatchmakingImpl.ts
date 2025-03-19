@@ -1,12 +1,12 @@
 import type AsyncQueueInterface from 'src/utils/AsyncQueueInterface.js';
 import type { MatchDetails } from '../../../schemas/zod.js';
+import { logger } from '../../../server.js';
 import AsyncQueue from '../../../utils/AsyncQueue.js';
 import type WebSocketService from '../../WebSocketServiceImpl.js';
 import type Match from '../../game/match/Match.js';
 import type GameService from '../../game/services/GameService.js';
 import GameServiceImpl from '../../game/services/GameServiceImpl.js';
 import type MatchMakingInterface from '../../lobbies/services/MatchMakingService.js';
-import { logger } from '../../../server.js';
 class MatchMaking implements MatchMakingInterface {
   // Matchmaking queue
   private queue: AsyncQueueInterface<string>;

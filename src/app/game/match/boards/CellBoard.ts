@@ -20,7 +20,7 @@ class Cell {
   public getDownCell(): Cell | null {
     return this.down;
   }
-  
+
   public getfLeftCell(): Cell | null {
     return this.left;
   }
@@ -29,13 +29,19 @@ class Cell {
     return this.right;
   }
 
-
   /**
    * Method to create a new cell
    * @param x {number} The x position of the cell
    * @param y {number} The y position of the cell
    */
-  constructor(x: number, y: number, cellUp:Cell|null, cellDown:Cell|null, cellLeft:Cell|null, cellRight:Cell|null) {
+  constructor(
+    x: number,
+    y: number,
+    cellUp: Cell | null,
+    cellDown: Cell | null,
+    cellLeft: Cell | null,
+    cellRight: Cell | null
+  ) {
     this.xPosition = x;
     this.yPosition = y;
     this.up = cellUp;

@@ -18,13 +18,12 @@ abstract class Board {
   public abstract generateBoard(): void;
   public abstract setUpEnemies(): void;
   public abstract setUpFruits(): void;
-  
-  public getBoard(): Cell[][]{
+
+  public getBoard(): Cell[][] {
     return this.board;
   }
-  public getEnemies(): Enemy[]{
+  public getEnemies(): Enemy[] {
     return this.enemies;
   }
-  
 }
 export default Board;

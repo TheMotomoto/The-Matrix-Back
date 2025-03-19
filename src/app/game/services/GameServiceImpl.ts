@@ -1,8 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { MatchDetails } from '../../../schemas/zod.js';
+import AsyncMap from '../../../utils/AsyncMap.js';
 import Match from '../../game/match/Match.js';
 import type GameService from '../../game/services/GameService.js';
-import AsyncMap from '../../../utils/AsyncMap.js';
 
 class GameServiceImpl implements GameService {
   private matches: AsyncMap<string, Match>;
@@ -26,7 +26,7 @@ class GameServiceImpl implements GameService {
     const gameMatch = await this.matches.get(matchId);
     if (!gameMatch) throw new Error('Match not found');
     await gameMatch.start();
-    return ;
+    return;
   }
 }
 export default GameServiceImpl;
