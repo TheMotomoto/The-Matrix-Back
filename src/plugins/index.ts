@@ -1,10 +1,10 @@
+import fastifyCors from '@fastify/cors';
 import type { FastifyInstance } from 'fastify';
 import { configureEnv } from './env.js';
 import { handleError } from './errorsHandler.js';
 import { configureRedis } from './redis.js';
 import { configureStatic } from './static.js';
 import { configureWebSocket } from './websocket.js';
-import fastifyCors from '@fastify/cors';
 
 export async function registerPlugins(server: FastifyInstance): Promise<void> {
   // Set up environment variables
@@ -16,9 +16,9 @@ export async function registerPlugins(server: FastifyInstance): Promise<void> {
     //origin: server.config.CORS_ORIGIN === '*'
     //  ? true
     //  : server.config.CORS_ORIGIN.split(','),
-    origin:  true,
+    origin: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    credentials: true
+    credentials: true,
   });
   // Set up WebSocket
   await configureWebSocket(server);

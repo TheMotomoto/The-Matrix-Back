@@ -56,18 +56,33 @@ export default class BoardDifficulty1 extends Board {
    */
   public setUpEnemies(): void {
     for (let i = 0; i < this.ENEMIES; i++) {
-      const x = Math.floor(Math.random() * this.ROWS);
-      const y = Math.floor(Math.random() * this.COLS);
+      const x = this.enemiesCoordinates[i][0];
+      const y = this.enemiesCoordinates[i][1];
       const troll = new Troll(this.board[x][y]);
       this.board[x][y].setCharacter(troll);
     }
   }
 
+  /**
+   * This method sets up the fruits in the board
+   */
   public setUpFruits(): void {
     for (let i = 0; i < this.FRUITS; i++) {
       const x = this.fruitsCoordinates[i][0];
       const y = this.fruitsCoordinates[i][1];
       this.board[x][y].setCharacter(new Fruit(this.board[x][y], this.FRUIT_TYPE));
     }
+  }
+
+  /**
+   * Method to set up the players in the board
+   */
+  public setUpPlayers(): void {
+    this.board[9][1].setCharacter(this.host);
+    this.board[9][14].setCharacter(this.guest);
+  }
+
+  public setUpInmovableObjects(): void {
+    // TODO --> Priority 3 <-- Implement this method
   }
 }

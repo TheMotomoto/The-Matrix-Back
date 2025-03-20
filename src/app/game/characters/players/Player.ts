@@ -1,4 +1,4 @@
-import PlayerError from '../../../errors/PlayerError.js';
+import PlayerError from '../../../errors/CharacterError.js';
 import type Cell from '../../match/boards/CellBoard.js';
 import Character from '../Character.js';
 
@@ -7,8 +7,19 @@ import Character from '../Character.js';
  * of a player in the game of bad-ice-cream.
  */
 class Player extends Character {
+  /**
+   * This method executes the player power // TODO
+   */
   execPower(): void {
     throw new Error('Method not implemented.');
+  }
+
+  /**
+   * NOTE FOR ME: This method should be changed by an act() method that changes according to the nature of the Character
+   * @returns {boolean} True, the player blocks the cell
+   */
+  public blocked(): boolean {
+    return true;
   }
   die(): void {
     throw new Error('Method not implemented.');

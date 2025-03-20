@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { ZodError } from 'zod';
-import PlayerError from '../app/errors/PlayerError.js';
+import PlayerError from '../app/errors/CharacterError.js';
 import { logger } from '../server.js';
 
 export class AppError extends Error {

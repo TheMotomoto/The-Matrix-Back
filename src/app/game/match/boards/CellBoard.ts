@@ -17,11 +17,15 @@ class Cell {
     return this.up;
   }
 
+  public blocked(): boolean {
+    return this.item ? this.item.blocked() : false;
+  }
+
   public getDownCell(): Cell | null {
     return this.down;
   }
 
-  public getfLeftCell(): Cell | null {
+  public getLeftCell(): Cell | null {
     return this.left;
   }
 
@@ -58,12 +62,16 @@ class Cell {
     return { x: this.xPosition, y: this.yPosition };
   }
 
-  public setCharacter(item: BoardItem): void {
+  public setCharacter(item: BoardItem | null): void {
     this.item = item;
   }
 
   public getCharacter(): BoardItem | null {
     return this.item;
+  }
+
+  public removeCharacter(): void {
+    this.item = null;
   }
 }
 export default Cell;
