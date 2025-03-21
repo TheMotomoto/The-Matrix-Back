@@ -1,6 +1,6 @@
 import { Mutex } from 'async-mutex';
-import CharacterError from 'src/app/errors/CharacterError.js';
 import { BoardItem } from '../match/boards/BoardItem.js';
+import type Cell from '../match/boards/CellBoard.js';
 
 /**
  * This class represents the behaviour and the properties
@@ -8,67 +8,52 @@ import { BoardItem } from '../match/boards/BoardItem.js';
  */
 abstract class Character extends BoardItem {
   protected readonly mutex = new Mutex();
-  /**
-   * Method to create a new character. Must be run on the same thread
-   */
-  public moveUp(): void {
-    this.mutex.runExclusive(() => {
-      const upCell = this.cell.getUpCell();
-      if (!upCell) throw new CharacterError(CharacterError.OUT_OF_BOUNDS);
-      if (upCell.blocked()) throw new CharacterError(CharacterError.BLOCKED_CELL);
+  protected alive = true;
 
-      this.cell.setCharacter(null);
-      this.cell = upCell;
+  moveUp(): void {
+    this.mutex.runExclusive(() => {
+      const cellUp = this.cell.getUpCell();
+      const { character, cell } = this.validateMove(cellUp);
+      this.move(cell, character);
     });
   }
 
-  /**
-   * Method to move the character down. Must be run on the same thread
-   */
-  public moveDown(): void {
+  moveDown(): void {
     this.mutex.runExclusive(() => {
-      const downCell = this.cell.getDownCell();
-      if (downCell) {
-        this.cell.setCharacter(null);
-        this.cell = downCell;
-      } else {
-        throw new CharacterError(CharacterError.OUT_OF_BOUNDS);
-      }
+      const cellDown = this.cell.getDownCell();
+      const { character, cell } = this.validateMove(cellDown);
+      this.move(cell, character);
     });
   }
 
-  /**
-   * Method to move the character left. Must be run on the same thread
-   */
-  public moveLeft(): void {
+  moveLeft(): void {
     this.mutex.runExclusive(() => {
-      const leftCell = this.cell.getLeftCell();
-      if (leftCell) {
-        this.cell.setCharacter(null);
-        this.cell = leftCell;
-      } else {
-        throw new CharacterError(CharacterError.OUT_OF_BOUNDS);
-      }
+      const cellLeft = this.cell.getLeftCell();
+      const { character, cell } = this.validateMove(cellLeft);
+      this.move(cell, character);
     });
   }
 
-  /**
-   * Method to move the character right. Must be run on the same thread
-   */
-  public moveRight(): void {
+  moveRight(): void {
     this.mutex.runExclusive(() => {
-      const rightCell = this.cell.getRightCell();
-      if (rightCell) {
-        this.cell.setCharacter(null);
-        this.cell = rightCell;
-      } else {
-        throw new CharacterError(CharacterError.OUT_OF_BOUNDS);
-      }
+      const cellRight = this.cell.getRightCell();
+      const { character, cell } = this.validateMove(cellRight);
+      this.move(cell, character);
     });
   }
 
   abstract execPower(): void;
   abstract die(): void;
+  abstract kill(): boolean;
   abstract reborn(): void;
+  protected abstract move(cell: Cell, character: Character | null): void;
+  protected abstract validateMove(cell: Cell | null): { character: Character | null; cell: Cell };
+
+  // The characters can't block the cell
+  public blocked(): boolean {
+    return false;
+  }
+
+  public pick(): void {} // The characters can't be picked up
 }
 export default Character;

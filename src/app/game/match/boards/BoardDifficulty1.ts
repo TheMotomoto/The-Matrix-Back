@@ -1,4 +1,5 @@
 import Troll from '../../characters/enemies/Troll.js';
+import Player from '../../characters/players/Player.js';
 import Board from './Board.js';
 import Cell from './CellBoard.js';
 import Fruit from './Fruit.js';
@@ -58,7 +59,7 @@ export default class BoardDifficulty1 extends Board {
     for (let i = 0; i < this.ENEMIES; i++) {
       const x = this.enemiesCoordinates[i][0];
       const y = this.enemiesCoordinates[i][1];
-      const troll = new Troll(this.board[x][y]);
+      const troll = new Troll(this.board[x][y], this);
       this.board[x][y].setCharacter(troll);
     }
   }
@@ -67,19 +68,26 @@ export default class BoardDifficulty1 extends Board {
    * This method sets up the fruits in the board
    */
   public setUpFruits(): void {
+    this.fruitsNumber = this.FRUITS;
     for (let i = 0; i < this.FRUITS; i++) {
       const x = this.fruitsCoordinates[i][0];
       const y = this.fruitsCoordinates[i][1];
-      this.board[x][y].setCharacter(new Fruit(this.board[x][y], this.FRUIT_TYPE));
+      const fruit = new Fruit(this.board[x][y], this.FRUIT_TYPE, this);
+      this.fruits.set({ x, y }, fruit);
+      this.board[x][y].setItem(fruit);
     }
   }
 
   /**
    * Method to set up the players in the board
    */
-  public setUpPlayers(): void {
+  public setUpPlayers(host: string, guest: string): void {
+    const hostPlayer = new Player(host, this.board[1][1], this);
+    const guestPlayer = new Player(guest, this.board[1][14], this);
     this.board[9][1].setCharacter(this.host);
     this.board[9][14].setCharacter(this.guest);
+    this.host = hostPlayer;
+    this.guest = guestPlayer;
   }
 
   public setUpInmovableObjects(): void {

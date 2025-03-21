@@ -1,3 +1,4 @@
+import type Character from '../../characters/Character.js';
 import type { BoardItem } from './BoardItem.js';
 
 /**
@@ -10,6 +11,7 @@ class Cell {
   private item: BoardItem | null = null;
   private up: Cell | null = null;
   private down: Cell | null = null;
+  private character: Character | null = null;
   private left: Cell | null = null;
   private right: Cell | null = null;
 
@@ -62,16 +64,33 @@ class Cell {
     return { x: this.xPosition, y: this.yPosition };
   }
 
-  public setCharacter(item: BoardItem | null): void {
+  public setItem(item: BoardItem | null): void {
     this.item = item;
   }
 
-  public getCharacter(): BoardItem | null {
+  public getItem(): BoardItem | null {
     return this.item;
+  }
+
+  public getCharacter(): Character | null {
+    return this.character;
   }
 
   public removeCharacter(): void {
     this.item = null;
   }
+
+  public setCharacter(character: Character | null): void {
+    this.character = character;
+  }
+
+  public pickItem(): void {
+    this.item?.pick();
+  }
 }
 export default Cell;
+
+export interface CellCoordinates {
+  x: number;
+  y: number;
+}

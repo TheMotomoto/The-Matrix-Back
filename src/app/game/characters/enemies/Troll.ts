@@ -1,16 +1,27 @@
+import CharacterError from '../../../errors/CharacterError.js';
+import type Cell from '../../match/boards/CellBoard.js';
+import type Character from '../Character.js';
 import Enemy from './Enemy.js';
 
 export default class Troll extends Enemy {
+  protected move(cellUp: Cell, character: Character | null): void {
+    this.cell.setCharacter(null);
+    cellUp.setCharacter(this);
+    this.cell = cellUp;
+    if (character && !character.kill()) {
+      character.die(); // If it's a player, it dies.
+    }
+  }
+
+  protected validateMove(cell: Cell | null): { character: Character | null; cell: Cell } {
+    if (!cell) throw new CharacterError(CharacterError.NULL_CELL); // If it's a border it can't move
+    if (cell.blocked()) throw new CharacterError(CharacterError.BLOCKED_CELL); // If it's a block object, it can't move
+    const character = cell.getCharacter();
+    if (character?.kill()) throw new CharacterError(CharacterError.BLOCKED_CELL); // If it's other enemy, it can't move
+    return { character, cell };
+  }
+
   calculateMovement(): void {
-    throw new Error('Method not implemented.');
-  }
-  execPower(): void {
-    throw new Error('Method not implemented.');
-  }
-  die(): void {
-    throw new Error('Method not implemented.');
-  }
-  reborn(): void {
-    throw new Error('Method not implemented.');
+    // TODO --> Implement Dijkstra algorithm
   }
 }
