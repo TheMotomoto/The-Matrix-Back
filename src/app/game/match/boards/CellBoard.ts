@@ -40,16 +40,17 @@ class Cell {
    * @param x {number} The x position of the cell
    * @param y {number} The y position of the cell
    */
-  constructor(
-    x: number,
-    y: number,
+  constructor(x: number, y: number) {
+    this.xPosition = x;
+    this.yPosition = y;
+  }
+
+  public setNeighbors(
     cellUp: Cell | null,
     cellDown: Cell | null,
     cellLeft: Cell | null,
     cellRight: Cell | null
   ) {
-    this.xPosition = x;
-    this.yPosition = y;
     this.up = cellUp;
     this.down = cellDown;
     this.left = cellLeft;
@@ -74,10 +75,6 @@ class Cell {
 
   public getCharacter(): Character | null {
     return this.character;
-  }
-
-  public removeCharacter(): void {
-    this.item = null;
   }
 
   public setCharacter(character: Character | null): void {

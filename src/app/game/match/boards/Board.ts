@@ -4,26 +4,33 @@ import type Cell from './CellBoard.js';
 import type { CellCoordinates } from './CellBoard.js';
 import type Fruit from './Fruit.js';
 abstract class Board {
-  protected readonly ROWS: number = 16;
-  protected readonly COLS: number = 16;
-  protected host: Player | null = null;
-  protected guest: Player | null = null;
+  protected readonly ROWS: number;
+  protected readonly COLS: number;
   protected readonly map: string;
   protected readonly level: number;
-  protected board: Cell[][] = [[]];
-  protected enemies: Enemy[] = [];
-  protected fruits: Map<CellCoordinates, Fruit> = new Map();
+  protected host: Player | null = null;
+  protected guest: Player | null = null;
+  protected board: Cell[][];
+  protected enemies: Enemy[];
+  protected fruits: Map<CellCoordinates, Fruit>;
   protected fruitsNumber = 0;
 
-  public abstract generateBoard(): void;
-  public abstract setUpEnemies(): void;
-  public abstract setUpFruits(): void;
-  public abstract setUpPlayers(host: string, guest: string): void;
-  public abstract setUpInmovableObjects(): void;
+  protected abstract generateBoard(): void;
+  protected abstract setUpEnemies(): void;
+  protected abstract setUpFruits(): void;
+  protected abstract setUpPlayers(host: string, guest: string): void;
+  protected abstract setUpInmovableObjects(): void;
+  protected abstract loadContext(): void;
 
   constructor(map: string, level: number) {
+    this.ROWS = 16;
+    this.COLS = 16;
+    this.board = [];
+    this.enemies = [];
+    this.fruits = new Map();
     this.map = map;
     this.level = level;
+    this.loadContext();
     this.generateBoard();
     this.setUpEnemies();
     this.setUpFruits();
@@ -39,9 +46,14 @@ abstract class Board {
   public getBoard(): Cell[][] {
     return this.board;
   }
+  public getFruitsNumber(): number {
+    return this.fruitsNumber;
+  }
   public getEnemies(): Enemy[] {
     return this.enemies;
   }
+
+  public abstract win(): void;
 
   public start(host: string, guest: string): void {
     this.setUpPlayers(host, guest);
