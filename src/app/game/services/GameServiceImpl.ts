@@ -3,6 +3,7 @@ import type { MatchDetails } from '../../../schemas/zod.js';
 import AsyncMap from '../../../utils/AsyncMap.js';
 import Match from '../../game/match/Match.js';
 import type GameService from '../../game/services/GameService.js';
+import { redis } from '../../../server.js';
 
 class GameServiceImpl implements GameService {
   private matches: AsyncMap<string, Match>;

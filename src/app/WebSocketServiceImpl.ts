@@ -3,14 +3,16 @@ import type { MatchDetails } from '../schemas/zod.js';
 import type Match from './game/match/Match.js';
 import type MatchMakingService from './lobbies/services/MatchMakingService.js';
 import MatchMaking from './lobbies/services/MatchmakingImpl.js';
+import { logger } from '../server.js';
 
 /**
  * This class is responsible for managing WebSocket connections and handling messages.
  * It also provides matchmaking services for players looking for a match.
  */
 export default class WebsocketService {
-  // Singleton Instance
   private static instance: WebsocketService;
+  private connections: Map<string, WebSocket>;
+  private matchMakingService: MatchMakingService;
   public static getInstance(): WebsocketService {
     if (!WebsocketService.instance) WebsocketService.instance = new WebsocketService();
     return WebsocketService.instance;
@@ -20,33 +22,23 @@ export default class WebsocketService {
     this.matchMakingService = MatchMaking.getInstance(this);
   }
 
-  private connections: Map<string, WebSocket>;
-  private matchMakingService: MatchMakingService;
-
-  // Registrar una nueva conexión
   public registerConnection(userId: string, socket: WebSocket): void {
     this.connections.set(userId, socket);
-    // Notificar a todos los usuarios que alguien se ha conectado
-    // websocketService.broadcastSystemMessage(`Usuario ${userId} se ha conectado`);
   }
 
-  // Remover una conexión
   public removeConnection(userId: string): void {
     this.connections.delete(userId);
-    // Notificar a todos los usuarios que alguien se ha desconectado
     this.broadcastSystemMessage(`Usuario ${userId} se ha desconectado`);
   }
 
-  // Enviar un mensaje del sistema a todos los usuarios
+  // Enviar un mensaje del sistema a todos los usuarios 
   public broadcastSystemMessage(message: string): void {
     const systemMessage = {
       type: 'system',
       message,
       timestamp: new Date().toISOString(),
     };
-
     const messageStr = JSON.stringify(systemMessage);
-
     for (const socket of this.connections.values()) {
       if (socket.readyState === WebSocket.OPEN) {
         socket.send(messageStr);
@@ -55,21 +47,27 @@ export default class WebsocketService {
   }
 
   public async matchMaking(userId: string, match: MatchDetails): Promise<void> {
-    console.info(`Matchmaking from ${userId}: looking for Match: ${JSON.stringify(match)}`);
+    logger.info(`Matchmaking from ${userId}: looking for Match: ${JSON.stringify(match)}`);
     this.matchMakingService.searchMatch(userId, match);
   }
 
   public async notifyMatchFound(match: Match): Promise<void> {
-    const hostSocket = this.connections.get(match.getHost());
+    try{
+      const hostSocket = this.connections.get(match.getHost());
     const guestSocket = this.connections.get(match.getGuest());
     const matchId = match.getId();
-
     if (hostSocket && guestSocket) {
-      hostSocket.send(JSON.stringify({ message: 'match-found', matchId, match }));
-      guestSocket.send(JSON.stringify({ message: 'match-found', matchId, match }));
+      hostSocket.send(JSON.stringify({ message: 'match-found', matchId, }));//match }));
+      guestSocket.send(JSON.stringify({ message: 'match-found', matchId, }));//match }));
+      this.connections.delete(match.getHost());
+      this.connections.delete(match.getGuest());
     } else {
       // TODO --> implement reconnect logic // Priority 2 NOT MVP
       throw new Error('One of the players is not connected');
+    }
+    } catch (error) {
+      logger.warn('An error occurred on web scoket controller...');
+      logger.error(error);
     }
   }
 }
