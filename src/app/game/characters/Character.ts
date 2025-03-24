@@ -10,32 +10,32 @@ abstract class Character extends BoardItem {
   protected readonly mutex = new Mutex();
   protected alive = true;
 
-  moveUp(): void {
-    this.mutex.runExclusive(() => {
+  async moveUp(): Promise<void> {
+    await this.mutex.runExclusive(() => {
       const cellUp = this.cell.getUpCell();
       const { character, cell } = this.validateMove(cellUp);
       this.move(cell, character);
     });
   }
 
-  moveDown(): void {
-    this.mutex.runExclusive(() => {
+  async moveDown(): Promise<void> {
+    await this.mutex.runExclusive(() => {
       const cellDown = this.cell.getDownCell();
       const { character, cell } = this.validateMove(cellDown);
       this.move(cell, character);
     });
   }
 
-  moveLeft(): void {
-    this.mutex.runExclusive(() => {
+  async moveLeft(): Promise<void> {
+    await this.mutex.runExclusive(() => {
       const cellLeft = this.cell.getLeftCell();
       const { character, cell } = this.validateMove(cellLeft);
       this.move(cell, character);
     });
   }
 
-  moveRight(): void {
-    this.mutex.runExclusive(() => {
+  async moveRight(): Promise<void> {
+    await this.mutex.runExclusive(() => {
       const cellRight = this.cell.getRightCell();
       const { character, cell } = this.validateMove(cellRight);
       this.move(cell, character);

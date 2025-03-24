@@ -15,7 +15,12 @@ export default class BoardDifficulty1 extends Board {
   private enemiesCoordinates: number[][] = [];
   private fruitsCoordinates: number[][] = [];
   private FRUITS = 0;
+  private playersStartCoordinates: number[][] = [];
 
+  constructor(map: string, level: number) {
+    super(map, level);
+    this.loadContext(); // We exec this method twice, because of TypeScript, it doesn't saves the statue assigned after we use the father constructor:)
+  }
   /**
    * Method to generate the board
    */
@@ -25,8 +30,8 @@ export default class BoardDifficulty1 extends Board {
       for (let j = 0; j < this.COLS; j++) {
         const cellUp = i > 0 ? this.board[i - 1][j] : null;
         const cellDown = i < this.ROWS - 1 ? this.board[i + 1][j] : null;
-        const cellLeft = j > 0 ? this.board[i][j] : null;
-        const cellRight = j < this.COLS - 1 ? this.board[i][j] : null;
+        const cellLeft = j > 0 ? this.board[i][j - 1] : null;
+        const cellRight = j < this.COLS - 1 ? this.board[i][j + 1] : null;
         this.board[i][j].setNeighbors(cellUp, cellDown, cellLeft, cellRight);
       }
     }
@@ -72,15 +77,28 @@ export default class BoardDifficulty1 extends Board {
    * Method to set up the players in the board
    */
   protected setUpPlayers(host: string, guest: string): void {
-    const hostPlayer = new Player(host, this.board[1][1], this);
-    const guestPlayer = new Player(guest, this.board[1][14], this);
-    this.board[9][1].setCharacter(this.host);
-    this.board[9][14].setCharacter(this.guest);
+    const [hostCoordinates, guestCoordinates] = this.playersStartCoordinates;
+    const hostPlayer = new Player(host, this.board[hostCoordinates[0]][hostCoordinates[1]], this);
+    const guestPlayer = new Player(
+      guest,
+      this.board[guestCoordinates[0]][guestCoordinates[1]],
+      this
+    );
     this.host = hostPlayer;
     this.guest = guestPlayer;
+    this.board[hostCoordinates[0]][hostCoordinates[1]].setCharacter(this.host);
+    this.board[guestCoordinates[0]][guestCoordinates[1]].setCharacter(this.guest);
+  }
+
+  public getFruits(): number {
+    return this.FRUITS;
   }
 
   protected loadContext(): void {
+    this.playersStartCoordinates = [
+      [9, 1],
+      [9, 14],
+    ];
     this.enemiesCoordinates = [
       [2, 4],
       [2, 12],

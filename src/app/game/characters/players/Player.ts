@@ -17,7 +17,7 @@ class Player extends Character {
   constructor(id: string, cell: Cell, board: Board) {
     super(cell, board);
     this.id = id;
-    this.cell = cell;
+    //this.cell = cell;
   }
   /**
    * This method executes the player power
@@ -57,15 +57,18 @@ class Player extends Character {
     return this.id;
   }
 
+  public isAlive(): boolean {
+    return this.alive;
+  }
+
   public getCoordinates(): { x: number; y: number } {
-    if (this.cell === null) throw new CharacterError(CharacterError.NULL_CELL);
     return this.cell.getCoordinates();
   }
 
-  protected move(cellUp: Cell, character: Character | null): void {
+  protected move(cellnew: Cell, character: Character | null): void {
     this.cell.setCharacter(null);
-    cellUp.setCharacter(this);
-    this.cell = cellUp;
+    cellnew.setCharacter(this);
+    this.cell = cellnew;
     this.cell.pickItem();
     if (character?.kill()) {
       // If it's an enemy, it dies.

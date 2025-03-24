@@ -52,6 +52,13 @@ abstract class Board {
   public getEnemies(): Enemy[] {
     return this.enemies;
   }
+  public getHost(): Player | null {
+    return this.host;
+  }
+
+  public getGuest(): Player | null {
+    return this.guest;
+  }
 
   public abstract win(): void;
 

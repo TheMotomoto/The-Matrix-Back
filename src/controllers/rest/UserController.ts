@@ -17,6 +17,7 @@ export default class UserController {
   public async handleCreateUser(_req: FastifyRequest, res: FastifyReply): Promise<void> {
     const userId: string = uuidv4();
     await redis.hset(`users:${userId}`, 'id', userId);
+    await redis.expire(`users:${userId}`, 2 * 60 * 60);
     return res.send({ userId });
   }
 
@@ -25,5 +26,16 @@ export default class UserController {
     const parsedId = validateString(userId);
     const user = await redis.hgetall(`users:${parsedId}`);
     return res.send(user);
+  }
+
+  public async handleGetUsers(_req: FastifyRequest, res: FastifyReply): Promise<void> {
+    const users = await redis.keys('users:*');
+    const usersData = await Promise.all(
+      users.map(async (key) => {
+        return await redis.hgetall(key);
+      }) //
+    );
+
+    return res.send(usersData);
   }
 }

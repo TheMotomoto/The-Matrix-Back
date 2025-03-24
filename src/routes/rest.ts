@@ -9,4 +9,8 @@ export async function restRoutes(fastify: FastifyInstance): Promise<void> {
   fastify.get('/users/:userId', async (req, res) => {
     await userController.handleGetUser(req, res);
   });
+
+  fastify.get('/users', async (req, res) => {
+    await userController.handleGetUsers(req, res);
+  });
 }

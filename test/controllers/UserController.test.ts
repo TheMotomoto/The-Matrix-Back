@@ -6,6 +6,9 @@ import { v4 as uuidv4 } from 'uuid';
 vi.mock('uuid', () => ({
   v4: vi.fn(() => 'fixed-uuid'),
 }));
+
+
+
 vi.mock('src/schemas/zod.js', () => ({
   validateString: vi.fn((str: string) => str),
 }));
@@ -13,6 +16,7 @@ vi.mock('../../src/server.js', () => ({
   redis: {
     hset: vi.fn(() => Promise.resolve()),
     hgetall: vi.fn(() => Promise.resolve({ id: 'fixed-uuid', name: 'Test User' })),
+    expire: vi.fn(() => Promise.resolve()),
   },
 }));
 describe('UserController', () => {

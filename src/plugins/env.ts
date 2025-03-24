@@ -34,7 +34,7 @@ const schema = {
     },
     REDIS_URL: {
       type: 'string',
-      default: 'redis://localhost:6379', // We can run it with Docker
+      default: 'redis://localhost:10923', // We can run it with Docker
     },
   },
 };
