@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-function validateMatchDetails(data: unknown): MatchDetails {
+function validateMatchInputDTO(data: unknown): MatchInputDTO {
   const schema = z.object({
     level: z.number().nonnegative(),
     map: z.string().nonempty(),
@@ -12,9 +12,16 @@ function validateString(data: unknown): string {
   const schema = z.string().nonempty().min(1);
   return schema.parse(data);
 }
-interface MatchDetails {
+interface MatchInputDTO {
   level: number;
   map: string;
 }
-export type { MatchDetails };
-export { validateMatchDetails, validateString };
+interface MatchDetails {
+  id: string;
+  host: string;
+  guest?: string | null;
+  level: number;
+  map: string;
+}
+export type { MatchInputDTO, MatchDetails };
+export { validateMatchInputDTO, validateString };

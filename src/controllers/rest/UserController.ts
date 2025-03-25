@@ -33,7 +33,7 @@ export default class UserController {
     const usersData = await Promise.all(
       users.map(async (key) => {
         return await redis.hgetall(key);
-      }) //
+      })
     );
 
     return res.send(usersData);

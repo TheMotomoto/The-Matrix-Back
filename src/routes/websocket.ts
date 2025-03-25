@@ -9,7 +9,7 @@ export async function websocketRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * This method works then i am looking for a matchmaking (no teamate)
    */
-  fastify.get('/matchmaking', { websocket: true }, (connection, req) => {
+  fastify.get('/matchmaking/:matchId', { websocket: true }, (connection, req) => {
     matchMakingController.handleMatchMaking(connection, req);
   });
 

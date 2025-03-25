@@ -1,9 +1,9 @@
-import { v4 as uuidv4 } from 'uuid';
 import type { MatchDetails } from '../../../schemas/zod.js';
 import AsyncMap from '../../../utils/AsyncMap.js';
 import Match from '../../game/match/Match.js';
 import type GameService from '../../game/services/GameService.js';
 import { redis } from '../../../server.js';
+import MatchError from '../../errors/MatchError.js';
 
 class GameServiceImpl implements GameService {
   private matches: AsyncMap<string, Match>;
@@ -17,10 +17,19 @@ class GameServiceImpl implements GameService {
   private constructor() {
     this.matches = new AsyncMap<string, Match>();
   }
-  public createMatch(host: string, guest: string, matchDetails: MatchDetails): Match {
-    const matchId = uuidv4();
-    const gameMatch = new Match(matchId, matchDetails.level, matchDetails.map, host, guest);
-    this.matches.add(matchId, gameMatch);
+  public createMatch(matchDetails: MatchDetails): Match {
+    if (!matchDetails.guest) throw new MatchError(MatchError.MATCH_CANNOT_BE_CREATED);
+    const gameMatch = new Match(
+      matchDetails.id,
+      matchDetails.level,
+      matchDetails.map,
+      matchDetails.host,
+      matchDetails.guest
+    );
+    this.matches.add(matchDetails.id, gameMatch);
+    // Update users with match id
+    redis.hset(`users:${matchDetails.host}`, 'match', matchDetails.id);
+    redis.hset(`users:${matchDetails.guest}`, 'match', matchDetails.id);
     return gameMatch;
   }
   public async startMatch(matchId: string): Promise<void> {

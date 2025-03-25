@@ -31,7 +31,7 @@ export default class WebsocketService {
     this.broadcastSystemMessage(`Usuario ${userId} se ha desconectado`);
   }
 
-  // Enviar un mensaje del sistema a todos los usuarios 
+  // Enviar un mensaje del sistema a todos los usuarios
   public broadcastSystemMessage(message: string): void {
     const systemMessage = {
       type: 'system',
@@ -46,25 +46,25 @@ export default class WebsocketService {
     }
   }
 
-  public async matchMaking(userId: string, match: MatchDetails): Promise<void> {
-    logger.info(`Matchmaking from ${userId}: looking for Match: ${JSON.stringify(match)}`);
-    this.matchMakingService.searchMatch(userId, match);
+  public async matchMaking(match: MatchDetails): Promise<void> {
+    logger.info(`Matchmaking from ${match.host}: looking for Match: ${JSON.stringify(match)}`);
+    this.matchMakingService.searchMatch(match);
   }
 
   public async notifyMatchFound(match: Match): Promise<void> {
-    try{
+    try {
       const hostSocket = this.connections.get(match.getHost());
-    const guestSocket = this.connections.get(match.getGuest());
-    const matchId = match.getId();
-    if (hostSocket && guestSocket) {
-      hostSocket.send(JSON.stringify({ message: 'match-found', matchId, }));//match }));
-      guestSocket.send(JSON.stringify({ message: 'match-found', matchId, }));//match }));
-      this.connections.delete(match.getHost());
-      this.connections.delete(match.getGuest());
-    } else {
-      // TODO --> implement reconnect logic // Priority 2 NOT MVP
-      throw new Error('One of the players is not connected');
-    }
+      const guestSocket = this.connections.get(match.getGuest());
+      const matchId = match.getId();
+      if (hostSocket && guestSocket) {
+        hostSocket.send(JSON.stringify({ message: 'match-found', matchId })); //match }));
+        guestSocket.send(JSON.stringify({ message: 'match-found', matchId })); //match }));
+        this.connections.delete(match.getHost());
+        this.connections.delete(match.getGuest());
+      } else {
+        // TODO --> implement reconnect logic // Priority 2 NOT MVP
+        throw new Error('One of the players is not connected');
+      }
     } catch (error) {
       logger.warn('An error occurred on web scoket controller...');
       logger.error(error);

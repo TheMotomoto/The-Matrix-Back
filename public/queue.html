@@ -115,7 +115,7 @@
       // Codificamos el objeto JSON para la URL
       const messageParam = encodeURIComponent(JSON.stringify(matchDetails));
       
-      const wsUrl = `${protocol}//${host}/ws/matchmaking?userId=${userId}&message=${messageParam}`;
+      const wsUrl = `${protocol}//${host}/ws/matchmaking/${userId}`;
       socket = new WebSocket(wsUrl);
       
       socket.onopen = () => {
@@ -154,7 +154,7 @@
           }
           else {
             // Otro tipo de mensaje JSON
-            addMessage('Servidor', data.message || JSON.stringify(data), 'system');
+            addMessage('Servidor', JSON.stringify(data), 'system');
           }
         } catch (error) {
           // Si el mensaje no es JSON válido, lo mostramos tal cual

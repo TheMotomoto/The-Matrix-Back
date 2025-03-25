@@ -3,5 +3,5 @@ import type Match from '../match/Match.js';
 
 export default interface GameService {
   startMatch(matchId: string): Promise<void>;
-  createMatch(host: string, guest: string, match: MatchDetails): Match;
+  createMatch(match: MatchDetails): Match;
 }

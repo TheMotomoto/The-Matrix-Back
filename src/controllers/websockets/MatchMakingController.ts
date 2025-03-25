@@ -1,9 +1,16 @@
-import type { FastifyRequest } from 'fastify';
+import type { FastifyReply, FastifyRequest } from 'fastify';
+import { v4 as uuidv4 } from 'uuid';
 import type { WebSocket } from 'ws';
 import WebsocketService from '../../app/WebSocketServiceImpl.js';
-import { type MatchDetails, validateMatchDetails, validateString } from '../../schemas/zod.js';
-import { logger } from '../../server.js';
+import {
+  type MatchDetails,
+  type MatchInputDTO,
+  validateMatchInputDTO,
+  validateString,
+} from '../../schemas/zod.js';
+import { logger, redis } from '../../server.js';
 import WebSocketError from './WebSocketError.js';
+import MatchError from 'src/app/errors/MatchError.js';
 const websocketService = WebsocketService.getInstance();
 /**
  * This class handles the errors different way a rest controller does.
@@ -20,16 +27,32 @@ export default class MatchMakingController {
     return MatchMakingController.instance;
   }
 
-  public handleMatchMaking(socket: WebSocket, request: FastifyRequest) {
+  public async handleMatchMaking(socket: WebSocket, request: FastifyRequest) {
     try {
-      const { userIdParsed, match }: { userIdParsed: string; match: MatchDetails } = this.parseData(
-        request.query
-      );
+      const { matchId } = request.params as { matchId: string };
+      const matchIdParsed = validateString(matchId);
 
-      websocketService.registerConnection(userIdParsed, socket);
+      const matchData = await redis.hgetall(`matches:${matchIdParsed}`);
+      logger.info(matchData);
+
+      if (!matchData) throw new MatchError(MatchError.MATCH_NOT_FOUND);
+
+      // Convert Redis data to MatchDetails
+      const match: MatchDetails = {
+        id: matchData.id,
+        host: matchData.host,
+        guest: matchData.guest,
+        level: Number(matchData.level),
+        map: matchData.map,
+      };
+
+      websocketService.registerConnection(match.host, socket);
+
       socket.send('Connected and looking for a match...');
-      websocketService.matchMaking(userIdParsed, match);
-      logger.info(`Matchmaking from ${userIdParsed}: looking for Match: ${JSON.stringify(match)}`);
+
+      websocketService.matchMaking(match);
+
+      logger.info(`Matchmaking from ${match.host}: looking for Match: ${JSON.stringify(match)}`);
 
       // Handle incoming messages
       socket.on('message', (_message: Buffer) => {
@@ -38,7 +61,7 @@ export default class MatchMakingController {
 
       socket.on('close', () => {
         // Clean resources when the connection is closed
-        websocketService.removeConnection(userIdParsed);
+        websocketService.removeConnection(match.host);
       });
 
       socket.on('error', (error: Error) => {
@@ -54,12 +77,51 @@ export default class MatchMakingController {
     }
   }
 
-  private parseData(query: unknown): { userIdParsed: string; match: MatchDetails } {
-    const { userId, message } = query as { userId?: string; message?: string };
+  private parseData(query: unknown): { match: MatchInputDTO } {
+    const { message } = query as { userId?: string; message?: string };
     if (message === undefined) throw new WebSocketError(WebSocketError.BAD_WEB_SOCKET_REQUEST);
     const matchRaw = JSON.parse(message);
+    const match = validateMatchInputDTO(matchRaw);
+    return { match };
+  }
+
+  public async handleCreateMatch(req: FastifyRequest, res: FastifyReply): Promise<void> {
+    const { userId } = req.params as { userId: string };
     const userIdParsed = validateString(userId);
-    const match = validateMatchDetails(matchRaw);
-    return { userIdParsed, match };
+    logger.info(`Data is -----------> : ${JSON.stringify(req.body)}`);
+    logger.info(`Data is -----------> : ${JSON.stringify(req.params)}`);
+    const matchInputDTO = validateMatchInputDTO(req.body as string);
+    logger.info(`Creating match for user ${userIdParsed}: ${JSON.stringify(matchInputDTO)}`);
+    const matchDetails: MatchDetails = { id: uuidv4(), host: userIdParsed, ...matchInputDTO };
+
+    redis.hset(
+      `matches:${matchDetails.id}`,
+      'id',
+      matchDetails.id,
+      'host',
+      matchDetails.host,
+      'guest',
+      '',
+      'level',
+      matchDetails.level,
+      'map',
+      matchDetails.map
+    );
+
+    redis.expire(`matches:${matchDetails.id}`, 1 * 60 * 60);
+
+    return res.send(matchDetails.id);
+  }
+
+  public async handleGetMatch(req: FastifyRequest, res: FastifyReply): Promise<void> {
+    const { userId } = req.params as { userId: string };
+    const parsedId = validateString(userId);
+    const keys = await redis.keys('matches:*');
+    const match = await Promise.all(
+      keys.map(async (key) => {
+        return await redis.hgetall(key);
+      })
+    );
+    res.send({ match, parsedId });
   }
 }
