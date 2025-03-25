@@ -9,7 +9,6 @@ import {
   validateString,
 } from '../../schemas/zod.js';
 import { logger, redis } from '../../server.js';
-import WebSocketError from './WebSocketError.js';
 import MatchError from 'src/app/errors/MatchError.js';
 const websocketService = WebsocketService.getInstance();
 /**
@@ -77,14 +76,6 @@ export default class MatchMakingController {
     }
   }
 
-  private parseData(query: unknown): { match: MatchInputDTO } {
-    const { message } = query as { userId?: string; message?: string };
-    if (message === undefined) throw new WebSocketError(WebSocketError.BAD_WEB_SOCKET_REQUEST);
-    const matchRaw = JSON.parse(message);
-    const match = validateMatchInputDTO(matchRaw);
-    return { match };
-  }
-
   public async handleCreateMatch(req: FastifyRequest, res: FastifyReply): Promise<void> {
     const { userId } = req.params as { userId: string };
     const userIdParsed = validateString(userId);
@@ -92,7 +83,7 @@ export default class MatchMakingController {
     logger.info(`Data is -----------> : ${JSON.stringify(req.params)}`);
     const matchInputDTO = validateMatchInputDTO(req.body as string);
     logger.info(`Creating match for user ${userIdParsed}: ${JSON.stringify(matchInputDTO)}`);
-    const matchDetails: MatchDetails = { id: uuidv4(), host: userIdParsed, ...matchInputDTO };
+    const matchDetails: MatchDetails = { id: uuidv4().replace(/-/g, '').slice(0,8), host: userIdParsed, ...matchInputDTO };
 
     redis.hset(
       `matches:${matchDetails.id}`,
@@ -116,12 +107,18 @@ export default class MatchMakingController {
   public async handleGetMatch(req: FastifyRequest, res: FastifyReply): Promise<void> {
     const { userId } = req.params as { userId: string };
     const parsedId = validateString(userId);
-    const keys = await redis.keys('matches:*');
-    const match = await Promise.all(
-      keys.map(async (key) => {
-        return await redis.hgetall(key);
+    
+    // Buscar todas las matches donde el host sea el parsedId
+    const matchesWithHost = await Promise.all(
+      (await redis.keys('matches:*')).map(async (key) => {
+        const match = await redis.hgetall(key);
+        return match.host === parsedId ? match : null;
       })
     );
-    res.send({ match, parsedId });
-  }
+
+    // Filtrar matches nulas
+    const filteredMatches = matchesWithHost.filter(match => match !== null);
+    
+    res.send({ matches: filteredMatches });
+}
 }
