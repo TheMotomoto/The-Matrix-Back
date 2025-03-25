@@ -1,3 +1,4 @@
+import type { BoardItemDTO } from '../../../../schemas/zod.js';
 import CharacterError from '../../../errors/CharacterError.js';
 import type Board from '../../match/boards/Board.js';
 import type Cell from '../../match/boards/CellBoard.js';
@@ -8,6 +9,9 @@ import Character from '../Character.js';
  * of a player in the game of bad-ice-cream.
  */
 class Player extends Character {
+  getDTO(): BoardItemDTO {
+    return { type: 'player' };
+  }
   private id: string;
   /**
    * Method to create a new player

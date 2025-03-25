@@ -58,6 +58,34 @@
       font-size: 0.8em;
       color: #666;
     }
+    .formatted-json {
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  padding: 10px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.match-title {
+  font-weight: bold;
+  color: #0066cc;
+  margin-bottom: 8px;
+  font-size: 1.1em;
+}
+
+.match-details {
+  color: #333;
+  line-height: 1.5;
+}
+
+pre {
+  white-space: pre-wrap;
+  background-color: #f8f9fa;
+  padding: 8px;
+  border-radius: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+  font-size: 0.9em;
+}
   </style>
 </head>
 <body>
@@ -95,6 +123,29 @@
     function updateStatus(message, elementId = 'status') {
       document.getElementById(elementId).textContent = elementId === 'status' ? `Estado: ${message}` : message;
     }
+    function formatServerMessage(data) {
+  try {
+    // Check if it looks like a match response
+    if (data.message === "match-found" && data.match) {
+      const match = data.match;
+      return `<div class="formatted-json">
+        <div class="match-title">🎮 Match Found! ID: ${match.id}</div>
+        <div class="match-details">
+          <span>🗺️ Level: ${match.level} (${match.map})</span><br>
+          <span>👤 Players: Host (${match.host}) & Guest (${match.guest.substring(0, 8)}...)</span><br>
+          <span>🍌 Fruit type: ${match.board.fruitType} (${match.board.fruits} total)</span><br>
+          <span>👾 Enemies: ${match.board.enemies}</span>
+        </div>
+      </div>`;
+    } else {
+      // For other types of JSON, pretty-print with indentation
+      return `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+    }
+  } catch (e) {
+    // If any error in formatting, fall back to regular JSON
+    return JSON.stringify(data);
+  }
+}
     
     function addMessage(sender, message, type) {
       const chatBox = document.getElementById('chatBox');
@@ -154,7 +205,7 @@
           }
           else {
             // Otro tipo de mensaje JSON
-            addMessage('Servidor', JSON.stringify(data), 'system');
+            addMessage('Servidor', formatServerMessage(data), 'system');
           }
         } catch (error) {
           // Si el mensaje no es JSON válido, lo mostramos tal cual

@@ -1,3 +1,4 @@
+import type { CellDTO } from '../../../../schemas/zod.js';
 import type Character from '../../characters/Character.js';
 import type { BoardItem } from './BoardItem.js';
 
@@ -84,10 +85,14 @@ class Cell {
   public pickItem(): void {
     this.item?.pick();
   }
+
+  public getCellDTO(): CellDTO {
+    return {
+      x: this.xPosition,
+      y: this.yPosition,
+      item: this.item?.getDTO() || null,
+      character: this.character?.getDTO() || null,
+    };
+  }
 }
 export default Cell;
-
-export interface CellCoordinates {
-  x: number;
-  y: number;
-}

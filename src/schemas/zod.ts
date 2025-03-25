@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { BoardItem } from '../app/game/match/boards/BoardItem.js';
 
 const validateMatchInputDTO = (data: unknown): MatchInputDTO => {
   const schema = z.object({
@@ -41,5 +42,47 @@ interface MatchDetails {
   level: number;
   map: string;
 }
-export type { MatchInputDTO, MatchDetails };
+interface BoardDTO {
+  host: string | null;
+  guest: string | null;
+  fruitType: string;
+  enemies: number;
+  enemiesCoordinates: number[][];
+  fruitsCoordinates: number[][];
+  fruits: number;
+  playersStartCoordinates: number[][];
+  board: CellDTO[][];
+}
+interface CellDTO {
+  x: number;
+  y: number;
+  item: BoardItemDTO | null;
+  character: BoardItemDTO | null;
+}
+interface BoardItemDTO {
+  type: string;
+}
+interface CellCoordinates {
+  x: number;
+  y: number;
+}
+interface MatchDTO {
+  id: string;
+  level: number;
+  map: string;
+  host: string;
+  guest: string;
+  board: BoardDTO;
+}
+
+export type {
+  MatchInputDTO,
+  MatchDetails,
+  BoardDTO,
+  CellDTO,
+  BoardItem,
+  BoardItemDTO,
+  CellCoordinates,
+  MatchDTO,
+};
 export { validateMatchInputDTO, validateMatchDetails, validateString };

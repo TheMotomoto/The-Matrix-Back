@@ -1,3 +1,4 @@
+import type { BoardDTO, CellDTO } from '../../../../schemas/zod.js';
 import Troll from '../../characters/enemies/Troll.js';
 import Player from '../../characters/players/Player.js';
 import Board from './Board.js';
@@ -124,6 +125,24 @@ export default class BoardDifficulty1 extends Board {
     this.FRUITS = this.fruitsCoordinates.length;
     this.FRUIT_TYPE = 'banana';
     this.ENEMIES = 4;
+  }
+
+  public getBoardDTO(): BoardDTO {
+    return {
+      host: this.host?.getId() || null,
+      guest: this.guest?.getId() || null,
+      fruitType: this.FRUIT_TYPE,
+      enemies: this.ENEMIES,
+      enemiesCoordinates: this.enemiesCoordinates,
+      fruitsCoordinates: this.fruitsCoordinates,
+      fruits: this.FRUITS,
+      playersStartCoordinates: this.playersStartCoordinates,
+      board: this.cellsBoardDTO(),
+    };
+  }
+
+  private cellsBoardDTO(): CellDTO[][] {
+    return this.board.map((row) => row.map((cell) => cell.getCellDTO()));
   }
 
   protected setUpInmovableObjects(): void {

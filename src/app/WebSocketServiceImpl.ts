@@ -54,10 +54,9 @@ export default class WebsocketService {
     try {
       const hostSocket = this.connections.get(match.getHost());
       const guestSocket = this.connections.get(match.getGuest());
-      const matchId = match.getId();
       if (hostSocket && guestSocket) {
-        hostSocket.send(JSON.stringify({ message: 'match-found', matchId })); //match }));
-        guestSocket.send(JSON.stringify({ message: 'match-found', matchId })); //match }));
+        hostSocket.send(JSON.stringify({ message: 'match-found', match: match.getMatchDTO() }));
+        guestSocket.send(JSON.stringify({ message: 'match-found', match: match.getMatchDTO() }));
         this.connections.delete(match.getHost());
         this.connections.delete(match.getGuest());
       } else {

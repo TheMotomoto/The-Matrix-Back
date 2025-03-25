@@ -1,7 +1,8 @@
+import type { BoardDTO } from '../../../../schemas/zod.js';
+import type { CellCoordinates } from '../../../../schemas/zod.js';
 import type Enemy from '../../characters/enemies/Enemy.js';
 import type Player from '../../characters/players/Player.js';
 import type Cell from './CellBoard.js';
-import type { CellCoordinates } from './CellBoard.js';
 import type Fruit from './Fruit.js';
 abstract class Board {
   protected readonly ROWS: number;
@@ -21,6 +22,7 @@ abstract class Board {
   protected abstract setUpPlayers(host: string, guest: string): void;
   protected abstract setUpInmovableObjects(): void;
   protected abstract loadContext(): void;
+  abstract getBoardDTO(): BoardDTO;
 
   constructor(map: string, level: number) {
     this.ROWS = 16;

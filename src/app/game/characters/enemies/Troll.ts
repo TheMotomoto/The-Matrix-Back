@@ -1,9 +1,13 @@
+import type { BoardItemDTO } from '../../../../schemas/zod.js';
 import CharacterError from '../../../errors/CharacterError.js';
 import type Cell from '../../match/boards/CellBoard.js';
 import type Character from '../Character.js';
 import Enemy from './Enemy.js';
 
 export default class Troll extends Enemy {
+  getDTO(): BoardItemDTO {
+    return { type: 'troll' };
+  }
   protected move(cellUp: Cell, character: Character | null): void {
     this.cell.setCharacter(null);
     cellUp.setCharacter(this);
