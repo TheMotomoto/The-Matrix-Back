@@ -2,6 +2,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import { v4 as uuidv4 } from 'uuid';
 import type { WebSocket } from 'ws';
 import WebsocketService from '../../app/WebSocketServiceImpl.js';
+import MatchError from '../../app/errors/MatchError.js';
 import {
   type MatchDetails,
   validateMatchDetails,
@@ -65,10 +66,12 @@ export default class MatchMakingController {
   public async handleCreateMatch(req: FastifyRequest, res: FastifyReply): Promise<void> {
     const { userId } = req.params as { userId: string };
     const userIdParsed = validateString(userId);
-    logger.info(`Data is -----------> : ${JSON.stringify(req.body)}`);
-    logger.info(`Data is -----------> : ${JSON.stringify(req.params)}`);
+    const user = await redis.hgetall(`users:${userIdParsed}`);
+    logger.warn(`User not found: ${JSON.stringify(user)}`);
+    if (Object.keys(user).length === 0) {
+      throw new MatchError(MatchError.PLAYER_NOT_FOUND);
+    }
     const matchInputDTO = validateMatchInputDTO(req.body as string);
-    logger.info(`Creating match for user ${userIdParsed}: ${JSON.stringify(matchInputDTO)}`);
     const matchDetails: MatchDetails = {
       id: uuidv4().replace(/-/g, '').slice(0, 8),
       host: userIdParsed,
@@ -97,6 +100,6 @@ export default class MatchMakingController {
   public async handleGetMatch(req: FastifyRequest, res: FastifyReply): Promise<void> {
     const { userId } = req.params as { userId: string };
     const match = await redis.hgetall(`users:${userId}`);
-    return res.send(match.match);
+    return res.send({ matchId: match.match });
   }
 }

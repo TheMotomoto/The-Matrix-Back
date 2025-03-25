@@ -174,7 +174,7 @@ describe('MatchMakingController', () => {
       } as unknown as FastifyRequest;
       const controller = MatchMakingController.getInstance();
       await controller.handleGetMatch(req, mockReply);
-      expect(mockReply.send).toHaveBeenCalledWith('match789');
+      expect(mockReply.send).toHaveBeenCalledWith({ matchId: 'match789' });
     });
   });
 });
