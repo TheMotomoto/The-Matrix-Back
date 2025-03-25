@@ -10,7 +10,7 @@ import Character from '../Character.js';
  */
 class Player extends Character {
   getDTO(): BoardItemDTO {
-    return { type: 'player' };
+    return { type: 'player', id: this.id };
   }
   private id: string;
   /**

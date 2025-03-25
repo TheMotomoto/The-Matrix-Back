@@ -61,6 +61,7 @@ interface CellDTO {
 }
 interface BoardItemDTO {
   type: string;
+  id?: string;
 }
 interface CellCoordinates {
   x: number;
