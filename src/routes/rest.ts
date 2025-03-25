@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
-import MatchMakingController from 'src/controllers/websockets/MatchMakingController.js';
 import UserController from '../controllers/rest/UserController.js';
+import MatchMakingController from '../controllers/websockets/MatchMakingController.js';
 const userController = UserController.getInstance();
 const matchMakingController = MatchMakingController.getInstance();
 export async function restRoutes(fastify: FastifyInstance): Promise<void> {

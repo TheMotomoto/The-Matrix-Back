@@ -4,12 +4,11 @@ import type { WebSocket } from 'ws';
 import WebsocketService from '../../app/WebSocketServiceImpl.js';
 import {
   type MatchDetails,
-  type MatchInputDTO,
+  validateMatchDetails,
   validateMatchInputDTO,
   validateString,
 } from '../../schemas/zod.js';
 import { logger, redis } from '../../server.js';
-import MatchError from 'src/app/errors/MatchError.js';
 const websocketService = WebsocketService.getInstance();
 /**
  * This class handles the errors different way a rest controller does.
@@ -31,19 +30,7 @@ export default class MatchMakingController {
       const { matchId } = request.params as { matchId: string };
       const matchIdParsed = validateString(matchId);
 
-      const matchData = await redis.hgetall(`matches:${matchIdParsed}`);
-      logger.info(matchData);
-
-      if (!matchData) throw new MatchError(MatchError.MATCH_NOT_FOUND);
-
-      // Convert Redis data to MatchDetails
-      const match: MatchDetails = {
-        id: matchData.id,
-        host: matchData.host,
-        guest: matchData.guest,
-        level: Number(matchData.level),
-        map: matchData.map,
-      };
+      const match = validateMatchDetails(await redis.hgetall(`matches:${matchIdParsed}`));
 
       websocketService.registerConnection(match.host, socket);
 
@@ -59,7 +46,6 @@ export default class MatchMakingController {
       });
 
       socket.on('close', () => {
-        // Clean resources when the connection is closed
         websocketService.removeConnection(match.host);
       });
 
@@ -83,7 +69,11 @@ export default class MatchMakingController {
     logger.info(`Data is -----------> : ${JSON.stringify(req.params)}`);
     const matchInputDTO = validateMatchInputDTO(req.body as string);
     logger.info(`Creating match for user ${userIdParsed}: ${JSON.stringify(matchInputDTO)}`);
-    const matchDetails: MatchDetails = { id: uuidv4().replace(/-/g, '').slice(0,8), host: userIdParsed, ...matchInputDTO };
+    const matchDetails: MatchDetails = {
+      id: uuidv4().replace(/-/g, '').slice(0, 8),
+      host: userIdParsed,
+      ...matchInputDTO,
+    };
 
     redis.hset(
       `matches:${matchDetails.id}`,
@@ -108,5 +98,5 @@ export default class MatchMakingController {
     const { userId } = req.params as { userId: string };
     const match = await redis.hgetall(`users:${userId}`);
     return res.send(match.match);
-}
+  }
 }

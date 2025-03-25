@@ -1,9 +1,9 @@
 import { WebSocket } from 'ws';
 import type { MatchDetails } from '../schemas/zod.js';
+import { logger } from '../server.js';
 import type Match from './game/match/Match.js';
 import type MatchMakingService from './lobbies/services/MatchMakingService.js';
 import MatchMaking from './lobbies/services/MatchmakingImpl.js';
-import { logger } from '../server.js';
 
 /**
  * This class is responsible for managing WebSocket connections and handling messages.
@@ -47,7 +47,6 @@ export default class WebsocketService {
   }
 
   public async matchMaking(match: MatchDetails): Promise<void> {
-    logger.info(`Matchmaking from ${match.host}: looking for Match: ${JSON.stringify(match)}`);
     this.matchMakingService.searchMatch(match);
   }
 
