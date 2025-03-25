@@ -100,25 +100,13 @@ export default class MatchMakingController {
     );
 
     redis.expire(`matches:${matchDetails.id}`, 1 * 60 * 60);
-
+    redis.hset(`users:${userIdParsed}`, 'match', matchDetails.id);
     return res.send(matchDetails.id);
   }
 
   public async handleGetMatch(req: FastifyRequest, res: FastifyReply): Promise<void> {
     const { userId } = req.params as { userId: string };
-    const parsedId = validateString(userId);
-    
-    // Buscar todas las matches donde el host sea el parsedId
-    const matchesWithHost = await Promise.all(
-      (await redis.keys('matches:*')).map(async (key) => {
-        const match = await redis.hgetall(key);
-        return match.host === parsedId ? match : null;
-      })
-    );
-
-    // Filtrar matches nulas
-    const filteredMatches = matchesWithHost.filter(match => match !== null);
-    
-    res.send({ matches: filteredMatches });
+    const match = await redis.hgetall(`users:${userId}`);
+    return res.send(match.match);
 }
 }
