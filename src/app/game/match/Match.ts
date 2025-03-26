@@ -1,4 +1,5 @@
 import type { MatchDTO } from '../../../schemas/zod.js';
+import type Player from '../characters/players/Player.js';
 import type Board from './boards/Board.js';
 import BoardDifficulty1 from './boards/BoardDifficulty1.js';
 class Match {
@@ -7,6 +8,7 @@ class Match {
   private map: string; // Should be a Map object
   private host: string;
   private guest: string;
+  private started: boolean;
   private readonly board: Board;
   constructor(id: string, level: number, map: string, host: string, guest: string) {
     this.id = id;
@@ -15,6 +17,7 @@ class Match {
     this.host = host;
     this.guest = guest;
     this.board = new BoardDifficulty1(this.map, this.level);
+    this.started = false;
   }
 
   public getMatchDTO(): MatchDTO {
@@ -26,6 +29,11 @@ class Match {
       guest: this.guest,
       board: this.board.getBoardDTO(),
     };
+  }
+
+  public getPlayer(id: string): Player | null {
+    const player = id === this.host ? this.board.getHost() : this.board.getGuest();
+    return player;
   }
 
   public getId(): string {
@@ -41,7 +49,9 @@ class Match {
   }
 
   public async start(): Promise<void> {
+    if (this.started) return;
     this.board.start(this.host, this.guest);
+    this.started = true;
   }
 }
 export default Match;

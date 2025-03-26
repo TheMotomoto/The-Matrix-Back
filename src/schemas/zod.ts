@@ -31,6 +31,14 @@ const validateMatchDetails = (data: unknown): MatchDetails => {
   return schema.parse(data);
 };
 
+const validateGameMessage = (data: unknown): GameMessage => {
+  const schema = z.object({
+    type: z.string().nonempty(),
+    payload: z.string().nonempty(),
+  });
+  return schema.parse(data);
+};
+
 interface MatchInputDTO {
   level: number;
   map: string;
@@ -75,6 +83,10 @@ interface MatchDTO {
   guest: string;
   board: BoardDTO;
 }
+interface GameMessage {
+  type: string;
+  payload: string;
+}
 
 export type {
   MatchInputDTO,
@@ -85,5 +97,6 @@ export type {
   BoardItemDTO,
   CellCoordinates,
   MatchDTO,
+  GameMessage,
 };
-export { validateMatchInputDTO, validateMatchDetails, validateString };
+export { validateMatchInputDTO, validateMatchDetails, validateString, validateGameMessage };

@@ -67,7 +67,6 @@ export default class MatchMakingController {
     const { userId } = req.params as { userId: string };
     const userIdParsed = validateString(userId);
     const user = await redis.hgetall(`users:${userIdParsed}`);
-    logger.warn(`User not found: ${JSON.stringify(user)}`);
     if (Object.keys(user).length === 0) {
       throw new MatchError(MatchError.PLAYER_NOT_FOUND);
     }

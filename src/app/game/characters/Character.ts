@@ -9,12 +9,13 @@ import type Cell from '../match/boards/CellBoard.js';
 abstract class Character extends BoardItem {
   protected readonly mutex = new Mutex();
   protected alive = true;
-
+  protected orientation: 'down' | 'up' | 'left' | 'right' = 'down';
   async moveUp(): Promise<void> {
     await this.mutex.runExclusive(() => {
       const cellUp = this.cell.getUpCell();
       const { character, cell } = this.validateMove(cellUp);
       this.move(cell, character);
+      this.orientation = 'up';
     });
   }
 
@@ -23,6 +24,7 @@ abstract class Character extends BoardItem {
       const cellDown = this.cell.getDownCell();
       const { character, cell } = this.validateMove(cellDown);
       this.move(cell, character);
+      this.orientation = 'down';
     });
   }
 
@@ -31,6 +33,7 @@ abstract class Character extends BoardItem {
       const cellLeft = this.cell.getLeftCell();
       const { character, cell } = this.validateMove(cellLeft);
       this.move(cell, character);
+      this.orientation = 'left';
     });
   }
 
@@ -39,7 +42,12 @@ abstract class Character extends BoardItem {
       const cellRight = this.cell.getRightCell();
       const { character, cell } = this.validateMove(cellRight);
       this.move(cell, character);
+      this.orientation = 'right';
     });
+  }
+
+  public getOrientation(): 'down' | 'up' | 'left' | 'right' {
+    return this.orientation;
   }
 
   abstract execPower(): void;
