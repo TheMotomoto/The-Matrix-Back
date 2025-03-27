@@ -1,9 +1,15 @@
-import type { FastifyRequest } from 'fastify';
+import type { FastifyReply, FastifyRequest } from 'fastify';
+import { v4 as uuidv4 } from 'uuid';
 import type { WebSocket } from 'ws';
 import WebsocketService from '../../app/WebSocketServiceImpl.js';
-import { type MatchDetails, validateMatchDetails, validateString } from '../../schemas/zod.js';
-import { logger } from '../../server.js';
-import WebSocketError from './WebSocketError.js';
+import MatchError from '../../app/errors/MatchError.js';
+import {
+  type MatchDetails,
+  validateMatchDetails,
+  validateMatchInputDTO,
+  validateString,
+} from '../../schemas/zod.js';
+import { logger, redis } from '../../server.js';
 const websocketService = WebsocketService.getInstance();
 /**
  * This class handles the errors different way a rest controller does.
@@ -20,16 +26,20 @@ export default class MatchMakingController {
     return MatchMakingController.instance;
   }
 
-  public handleMatchMaking(socket: WebSocket, request: FastifyRequest) {
+  public async handleMatchMaking(socket: WebSocket, request: FastifyRequest) {
     try {
-      const { userIdParsed, match }: { userIdParsed: string; match: MatchDetails } = this.parseData(
-        request.query
-      );
+      const { matchId } = request.params as { matchId: string };
+      const matchIdParsed = validateString(matchId);
 
-      websocketService.registerConnection(userIdParsed, socket);
+      const match = validateMatchDetails(await redis.hgetall(`matches:${matchIdParsed}`));
+
+      websocketService.registerConnection(match.host, socket);
+
       socket.send('Connected and looking for a match...');
-      websocketService.matchMaking(userIdParsed, match);
-      logger.info(`Matchmaking from ${userIdParsed}: looking for Match: ${JSON.stringify(match)}`);
+
+      websocketService.matchMaking(match);
+
+      logger.info(`Matchmaking from ${match.host}: looking for Match: ${JSON.stringify(match)}`);
 
       // Handle incoming messages
       socket.on('message', (_message: Buffer) => {
@@ -37,8 +47,7 @@ export default class MatchMakingController {
       });
 
       socket.on('close', () => {
-        // Clean resources when the connection is closed
-        websocketService.removeConnection(userIdParsed);
+        websocketService.removeConnection(match.host);
       });
 
       socket.on('error', (error: Error) => {
@@ -54,12 +63,42 @@ export default class MatchMakingController {
     }
   }
 
-  private parseData(query: unknown): { userIdParsed: string; match: MatchDetails } {
-    const { userId, message } = query as { userId?: string; message?: string };
-    if (message === undefined) throw new WebSocketError(WebSocketError.BAD_WEB_SOCKET_REQUEST);
-    const matchRaw = JSON.parse(message);
+  public async handleCreateMatch(req: FastifyRequest, res: FastifyReply): Promise<void> {
+    const { userId } = req.params as { userId: string };
     const userIdParsed = validateString(userId);
-    const match = validateMatchDetails(matchRaw);
-    return { userIdParsed, match };
+    const user = await redis.hgetall(`users:${userIdParsed}`);
+    if (Object.keys(user).length === 0) {
+      throw new MatchError(MatchError.PLAYER_NOT_FOUND);
+    }
+    const matchInputDTO = validateMatchInputDTO(req.body as string);
+    const matchDetails: MatchDetails = {
+      id: uuidv4().replace(/-/g, '').slice(0, 8),
+      host: userIdParsed,
+      ...matchInputDTO,
+    };
+
+    redis.hset(
+      `matches:${matchDetails.id}`,
+      'id',
+      matchDetails.id,
+      'host',
+      matchDetails.host,
+      'guest',
+      '',
+      'level',
+      matchDetails.level,
+      'map',
+      matchDetails.map
+    );
+
+    redis.expire(`matches:${matchDetails.id}`, 1 * 60 * 60);
+    redis.hset(`users:${userIdParsed}`, 'match', matchDetails.id);
+    return res.send(matchDetails.id);
+  }
+
+  public async handleGetMatch(req: FastifyRequest, res: FastifyReply): Promise<void> {
+    const { userId } = req.params as { userId: string };
+    const match = await redis.hgetall(`users:${userId}`);
+    return res.send({ matchId: match.match });
   }
 }

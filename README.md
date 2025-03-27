@@ -23,3 +23,21 @@ mkdir src; cd ./src;  mkdir 'controllers', 'services', 'routes', 'plugins', 'uti
 ```
 
 Other examples of how to setup the scaffolding : [Effortless File Structure Setup for Node.js Fastify Projects](https://mbebars.medium.com/effortless-file-structure-setup-for-node-js-fastify-projects-481561df51a1)
+
+### Docker Implementation
+
+To run this project with local redis instance, you have to start docker (you can run it with [Docker Desktop](https://www.docker.com/products/docker-desktop/)).
+
+Then open a powershell terminal in the `The-Matrix-Back` directory.
+Run the command:
+
+```
+docker-compose up
+```
+
+It will run the docker image of redis.
+
+You can stop the redis instance with:
+```
+Crl + C
+```

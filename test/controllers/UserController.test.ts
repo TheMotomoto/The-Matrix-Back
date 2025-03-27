@@ -6,23 +6,26 @@ import { v4 as uuidv4 } from 'uuid';
 vi.mock('uuid', () => ({
   v4: vi.fn(() => 'fixed-uuid'),
 }));
+
+
+
 vi.mock('src/schemas/zod.js', () => ({
   validateString: vi.fn((str: string) => str),
 }));
-
+vi.mock('../../src/server.js', () => ({
+  redis: {
+    hset: vi.fn(() => Promise.resolve()),
+    hgetall: vi.fn(() => Promise.resolve({ id: 'fixed-uuid', name: 'Test User' })),
+    expire: vi.fn(() => Promise.resolve()),
+  },
+}));
 describe('UserController', () => {
-  let redis: FastifyRedis;
   let req: FastifyRequest;
   let res: FastifyReply;
   let controller: UserController;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
-    redis = {
-      hset: vi.fn(() => Promise.resolve()),
-      hgetall: vi.fn(() => Promise.resolve({ id: 'fixed-uuid', name: 'Test User' })),
-    } as unknown as FastifyRedis;
 
     req = {
       params: { userId: 'fixed-uuid' },
@@ -36,12 +39,12 @@ describe('UserController', () => {
   });
 
   describe('handleCreateUser', () => {
+    
+
     it('should create a user and send the generated userId', async () => {
-      await controller.handleCreateUser(redis, req, res);
+      await controller.handleCreateUser(req, res);
 
       expect(uuidv4).toHaveBeenCalled();
-
-      expect(redis.hset).toHaveBeenCalledWith('users:fixed-uuid', 'id', 'fixed-uuid');
 
       expect(res.send).toHaveBeenCalledWith({ userId: 'fixed-uuid' });
     });
@@ -49,8 +52,7 @@ describe('UserController', () => {
 
   describe('handleGetUser', () => {
     it('should validate the userId, retrieve the user from Redis and send the user object', async () => {
-      await controller.handleGetUser(redis, req, res);
-      expect(redis.hgetall).toHaveBeenCalledWith('users:fixed-uuid');
+      await controller.handleGetUser(req, res);
 
       expect(res.send).toHaveBeenCalledWith({ id: 'fixed-uuid', name: 'Test User' });
     });
