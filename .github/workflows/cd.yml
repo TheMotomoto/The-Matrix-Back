@@ -1,6 +1,5 @@
 # Build and deploy Node.js app to Azure Web App - bad-ice-cream-back
 name: CD Bad Ice Cream
-
 on:
   push:
     branches:
@@ -31,8 +30,8 @@ jobs:
       - name: pnpm install, build, and test
         run: |
           pnpm install
-          pnpm run build
-          pnpm run test
+          pnpm run build --if-present
+          pnpm run test --if-present
 
       - name: Zip artifact for deployment
         run: zip -r release.zip ./*
@@ -55,15 +54,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app
-
-      - name: Unzip artifact for deployment
-        run: unzip release.zip
-      
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'bad-ice-cream-back'
           slot-name: 'Production'
-          package: .
+          package: release.zip
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_8F2CC811A03E471D8ED2DB8533CA02F6 }}
+          clean: true 
