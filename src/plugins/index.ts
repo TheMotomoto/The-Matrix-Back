@@ -25,7 +25,7 @@ export async function registerPlugins(server: FastifyInstance): Promise<void> {
   // Set up static files
   await configureStatic(server);
   // Set up Redis
-  await configureRedis(server);
-
-  // Aquí puedes registrar más plugins según sea necesario
+  if (server.config.NODE_ENV !== 'test') {
+    await configureRedis(server);
+  }
 }
