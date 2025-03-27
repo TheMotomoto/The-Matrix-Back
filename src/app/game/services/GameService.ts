@@ -8,4 +8,5 @@ export default interface GameService {
   registerConnection(user: string, socket: WebSocket): void;
   removeConnection(user: string): void;
   handleGameMessage(user: string, matchId: string, message: Buffer): void;
+  getMatch(matchId: string): Match | undefined;
 }

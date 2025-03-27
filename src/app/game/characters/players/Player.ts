@@ -1,5 +1,6 @@
 import type { BoardItemDTO } from '../../../../schemas/zod.js';
 import CharacterError from '../../../errors/CharacterError.js';
+import MatchError from '../../../errors/MatchError.js';
 import type Board from '../../match/boards/Board.js';
 import type Cell from '../../match/boards/CellBoard.js';
 import Character from '../Character.js';
@@ -70,14 +71,20 @@ class Player extends Character {
   }
 
   protected move(cellnew: Cell, character: Character | null): void {
+    if (this.checkWin()) throw new MatchError(MatchError.WIN);
     this.cell.setCharacter(null);
     cellnew.setCharacter(this);
     this.cell = cellnew;
     this.cell.pickItem();
+
     if (character?.kill()) {
       // If it's an enemy, it dies.
       this.die();
     }
+  }
+
+  private checkWin(): boolean {
+    return this.board.checkWin();
   }
 
   protected validateMove(cell: Cell | null): { character: Character | null; cell: Cell } {

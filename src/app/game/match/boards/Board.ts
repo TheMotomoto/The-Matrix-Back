@@ -12,7 +12,7 @@ abstract class Board {
   protected host: Player | null = null;
   protected guest: Player | null = null;
   protected board: Cell[][];
-  protected enemies: Enemy[];
+  protected enemies: Map<string, Enemy>;
   protected fruits: Map<CellCoordinates, Fruit>;
   protected fruitsNumber = 0;
 
@@ -22,13 +22,14 @@ abstract class Board {
   protected abstract setUpPlayers(host: string, guest: string): void;
   protected abstract setUpInmovableObjects(): void;
   protected abstract loadContext(): void;
+  protected abstract startEnemies(matchId: string): Promise<void>;
   abstract getBoardDTO(): BoardDTO;
 
   constructor(map: string, level: number) {
     this.ROWS = 16;
     this.COLS = 16;
     this.board = [];
-    this.enemies = [];
+    this.enemies = new Map();
     this.fruits = new Map();
     this.map = map;
     this.level = level;
@@ -51,7 +52,7 @@ abstract class Board {
   public getFruitsNumber(): number {
     return this.fruitsNumber;
   }
-  public getEnemies(): Enemy[] {
+  public getEnemies(): Map<string, Enemy> {
     return this.enemies;
   }
   public getHost(): Player | null {
@@ -63,9 +64,12 @@ abstract class Board {
   }
 
   public abstract win(): void;
+  public abstract checkWin(): boolean;
 
-  public start(host: string, guest: string): void {
+  public async startGame(host: string, guest: string, _matchId: string): Promise<void> {
     this.setUpPlayers(host, guest);
+    //await this.startEnemies(matchId);
+
     // TODO
     // Start threads of enemies
   }

@@ -20,12 +20,16 @@ class GameServiceImpl implements GameService {
     this.matches = new Map<string, Match>();
     this.connections = new Map();
   }
+  getMatch(matchId: string): Match | undefined {
+    if (!this.matches.has(matchId)) return undefined;
+    return this.matches.get(matchId);
+  }
   public removeConnection(user: string): void {
     this.connections.delete(user);
   }
 
   public async handleGameMessage(userId: string, matchId: string, message: Buffer): Promise<void> {
-    const { type, payload, gameMatch, player, socket } = this.validateMessage(
+    const { type, payload, gameMatch, player, socketP1, socketP2 } = this.validateMessage(
       userId,
       matchId,
       message
@@ -47,7 +51,7 @@ class GameServiceImpl implements GameService {
       default:
         throw new MatchError(MatchError.INVALID_MESSAGE_TYPE);
     }
-    socket.send(JSON.stringify({ updatedMatch: gameMatch.getMatchDTO() })); // Should it be a GameMatch DTO with just relevant DATA?
+    this.notifyPlayers(socketP1, socketP2, gameMatch.getMatchDTO());
   }
 
   public registerConnection(user: string, socket: WebSocket): void {
@@ -71,7 +75,7 @@ class GameServiceImpl implements GameService {
   public async startMatch(matchId: string): Promise<void> {
     const gameMatch = this.matches.get(matchId);
     if (!gameMatch) throw new MatchError(MatchError.MATCH_NOT_FOUND);
-    await gameMatch.start();
+    await gameMatch.startGame();
     return;
   }
 
@@ -79,19 +83,28 @@ class GameServiceImpl implements GameService {
     userId: string,
     matchId: string,
     message: Buffer
-  ): { type: string; payload: string; gameMatch: Match; player: Player; socket: WebSocket } {
+  ): {
+    type: string;
+    payload: string;
+    gameMatch: Match;
+    player: Player;
+    socketP1: WebSocket;
+    socketP2: WebSocket;
+  } {
     const { type, payload } = validateGameMessage(message.toString());
 
     const gameMatch = this.matches.get(matchId);
     if (!gameMatch) throw new MatchError(MatchError.MATCH_NOT_FOUND); // Not found in the matches map
 
-    const socket = this.connections.get(userId);
-    if (!socket) throw new MatchError(MatchError.PLAYER_NOT_FOUND); // Not found in the socket connections
+    const socketP1 = this.connections.get(userId);
+    const socketP2 = this.connections.get(gameMatch.getGuest());
+    if (!socketP1) throw new MatchError(MatchError.PLAYER_NOT_FOUND); // Not found in the socketP1 connections
+    if (!socketP2) throw new MatchError(MatchError.PLAYER_NOT_FOUND); // Not found in the socketP2 connections
 
     const player = gameMatch.getPlayer(userId);
     if (!player) throw new MatchError(MatchError.PLAYER_NOT_FOUND); // Not found in the match asocieated with the matchId
 
-    return { type, payload, gameMatch, player, socket };
+    return { type, payload, gameMatch, player, socketP1, socketP2 };
   }
 
   private movePlayer(player: Player, direction: string): void {
@@ -111,6 +124,11 @@ class GameServiceImpl implements GameService {
       default:
         throw new MatchError(MatchError.INVALID_MOVE);
     }
+  }
+
+  private notifyPlayers(socketP1: WebSocket, socketP2: WebSocket, dataDTO: unknown): void {
+    socketP1.send(JSON.stringify(dataDTO));
+    socketP2.send(JSON.stringify(dataDTO));
   }
 }
 export default GameServiceImpl;

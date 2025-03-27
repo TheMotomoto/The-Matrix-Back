@@ -1,4 +1,5 @@
 import type { MatchDTO } from '../../../schemas/zod.js';
+import type Enemy from '../characters/enemies/Enemy.js';
 import type Player from '../characters/players/Player.js';
 import type Board from './boards/Board.js';
 import BoardDifficulty1 from './boards/BoardDifficulty1.js';
@@ -31,6 +32,10 @@ class Match {
     };
   }
 
+  public getEnemies(): Map<string, Enemy> {
+    return this.board.getEnemies();
+  }
+
   public getPlayer(id: string): Player | null {
     const player = id === this.host ? this.board.getHost() : this.board.getGuest();
     return player;
@@ -48,9 +53,9 @@ class Match {
     return this.guest;
   }
 
-  public async start(): Promise<void> {
+  public async startGame(): Promise<void> {
     if (this.started) return;
-    this.board.start(this.host, this.guest);
+    await this.board.startGame(this.host, this.guest, this.id);
     this.started = true;
   }
 }

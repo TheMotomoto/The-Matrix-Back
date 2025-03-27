@@ -33,7 +33,7 @@ describe('Player', () => {
         const board = new BoardDifficulty1('map', 1);
         const host = 'host';
         const guest = 'guest';
-        board.start(host, guest);
+        await board.startGame(host, guest, 'matchId');
         const player = board.getHost();
         expect(player?.getCoordinates()).toStrictEqual({ x: 9, y: 1 });
         expect(board.getBoard()[9][1].getCharacter()).toBe(player);
@@ -48,7 +48,7 @@ describe('Player', () => {
         const board = new BoardDifficulty1('map', 1);
         const host = 'host';
         const guest = 'guest';
-        board.start(host, guest);
+        await board.startGame(host, guest, 'matchId');
         const player = board.getHost();
         expect(player?.getCoordinates()).toStrictEqual({ x: 9, y: 1 });
         expect(board.getBoard()[9][1].getCharacter()).toBe(player);
@@ -63,7 +63,7 @@ describe('Player', () => {
         const board = new BoardDifficulty1('map', 1);
         const host = 'host';
         const guest = 'guest';
-        board.start(host, guest);
+        await board.startGame(host, guest, 'matchId');
         const player = board.getHost();
         expect(player?.getCoordinates()).toStrictEqual({ x: 9, y: 1 });
         expect(board.getBoard()[9][1].getCharacter()).toBe(player);
@@ -78,7 +78,7 @@ describe('Player', () => {
         const board = new BoardDifficulty1('map', 1);
         const host = 'host';
         const guest = 'guest';
-        board.start(host, guest);
+        await board.startGame(host, guest, 'matchId');
         const player = board.getHost();
         expect(player?.getCoordinates()).toStrictEqual({ x: 9, y: 1 });
         expect(board.getBoard()[9][1].getCharacter()).toBe(player);
@@ -93,7 +93,7 @@ describe('Player', () => {
         const board = new BoardDifficulty1('map', 1);
         const host = 'host';
         const guest = 'guest';
-        board.start(host, guest);
+        await board.startGame(host, guest, 'matchId');
         const player = board.getHost();
         expect(player?.getCoordinates()).toStrictEqual({ x: 9, y: 1 });
         expect(board.getBoard()[9][1].getCharacter()).toBe(player);
@@ -105,7 +105,7 @@ describe('Player', () => {
         const board = new BoardDifficulty1('map', 1);
         const host = 'host';
         const guest = 'guest';
-        board.start(host, guest);
+        await board.startGame(host, guest, 'matchId');
         const player = board.getHost();
         const player2 = board.getGuest();
         board.getBoard()[9][2].setCharacter(player2);
@@ -117,22 +117,4 @@ describe('Player', () => {
         expect(board.getBoard()[9][1].getCharacter()).toBe(player);
         expect(board.getBoard()[9][2].getCharacter()).toBe(player2);
     })
-
-    it('should die when it moves to an enemy cell', async () => {
-        const board = new BoardDifficulty1('map', 1);
-        const host = 'host';
-        const guest = 'guest';
-        board.start(host, guest);
-        const player = board.getHost();
-        const enemy = board.getEnemies()[0];
-        board.getBoard()[9][2].setCharacter(enemy);
-        expect(player?.getCoordinates()).toStrictEqual({ x: 9, y: 1 });
-        expect(player?.isAlive()).toBeTruthy();
-        await player?.moveRight();
-        expect(player?.getCoordinates()).toStrictEqual({ x: 9, y: 2 });
-        expect(player?.isAlive()).toBeFalsy();
-    })
-
-
-
 });

@@ -39,11 +39,11 @@ describe('Board', () => {
         expect(board.getFruitsNumber()).toBe(13);
     })
 
-    it('should set up players', () => {
+    it('should set up players', async () => {
         const board = new BoardDifficulty1("desert", 1);
         const host = 'host';
         const guest = 'guest';
-        board.start(host, guest);
+        await board.startGame(host, guest, 'matchId');
         expect(board.getBoard()[9][1].getCharacter()).toBe(board.getHost());
         expect(board.getBoard()[9][1].getCharacter() !== null).toBeTruthy();
         expect(board.getBoard()[9][14].getCharacter() !== null).toBeTruthy();

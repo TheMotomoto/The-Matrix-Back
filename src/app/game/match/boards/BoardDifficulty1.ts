@@ -1,4 +1,8 @@
+import { resolve } from 'node:path';
+import { Worker } from 'node:worker_threads';
 import type { BoardDTO, CellDTO } from '../../../../schemas/zod.js';
+import { logger } from '../../../../server.js';
+import BoardError from '../../../errors/BoardError.js';
 import Troll from '../../characters/enemies/Troll.js';
 import Player from '../../characters/players/Player.js';
 import Board from './Board.js';
@@ -16,6 +20,7 @@ export default class BoardDifficulty1 extends Board {
   private enemiesCoordinates: number[][] = [];
   private fruitsCoordinates: number[][] = [];
   private FRUITS = 0;
+  private fruitsRounds = 0;
   private playersStartCoordinates: number[][] = [];
 
   constructor(map: string, level: number) {
@@ -38,6 +43,15 @@ export default class BoardDifficulty1 extends Board {
     }
   }
 
+  public checkWin(): boolean {
+    if (!this.host || !this.guest) throw new BoardError(BoardError.USER_NOT_DEFINED);
+    return (
+      this.fruitsNumber === 0 &&
+      this.fruitsRounds === 0 &&
+      (this.host.isAlive() || this.guest.isAlive())
+    );
+  }
+
   private createBoard(): void {
     for (let i = 0; i < this.ROWS; i++) {
       this.board[i] = [];
@@ -55,7 +69,7 @@ export default class BoardDifficulty1 extends Board {
       const x = this.enemiesCoordinates[i][0];
       const y = this.enemiesCoordinates[i][1];
       const troll = new Troll(this.board[x][y], this);
-      this.enemies.push(troll);
+      this.enemies.set(troll.getId(), troll);
       this.board[x][y].setCharacter(troll);
     }
   }
@@ -125,6 +139,7 @@ export default class BoardDifficulty1 extends Board {
     this.FRUITS = this.fruitsCoordinates.length;
     this.FRUIT_TYPE = 'banana';
     this.ENEMIES = 4;
+    this.fruitsRounds = 2;
   }
 
   public getBoardDTO(): BoardDTO {
@@ -149,7 +164,34 @@ export default class BoardDifficulty1 extends Board {
     // TODO --> Priority 3 <-- Implement this method
   }
 
-  public win(): void {
-    // TODO --> Stop all the threads of the enemies, the timer and the players
+  private async stop(): Promise<void> {
+    // TODO --> Priority 2 <-- Implement this method
+  }
+
+  protected async startEnemies(matchId: string): Promise<void> {
+    // Here I call the worker
+    const fileName = resolve(__dirname, '../../../../../dist/src/workers/Enemies.worker.js');
+    for (const enemy of this.enemies.values()) {
+      const worker = new Worker(fileName, {
+        workerData: {
+          enemyId: enemy.getId(),
+          matchId,
+        },
+      });
+      worker.on('message', (_message) => {});
+      worker.on('error', (error) => {
+        logger.warn('An error occurred while running the enemies worker');
+        logger.error(error);
+      });
+      worker.on('exit', (code) => {
+        if (code !== 0) logger.warn(`Enemies worker stopped with exit code ${code}`);
+        else logger.info('Enemies worker finished');
+      });
+    }
+  }
+
+  public async win(): Promise<boolean> {
+    await this.stop();
+    return true;
   }
 }

@@ -1,3 +1,4 @@
+import { isMainThread } from 'node:worker_threads';
 import type { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import Fastify from 'fastify';
 import { envOptions } from './plugins/env.js';
@@ -26,6 +27,8 @@ const start = async () => {
     await server.listen({ port, host });
   } catch (err) {
     server.log.error(err);
+    console.log('There has been an error');
+    console.log(err);
     process.exit(1);
   }
 };
@@ -41,7 +44,9 @@ process.on('SIGINT', () => closeGracefully('SIGINT'));
 process.on('SIGTERM', () => closeGracefully('SIGTERM'));
 
 // Iniciar el servidor
-start();
+if (isMainThread && server.config.NODE_ENV !== 'test') {
+  start();
+}
 
 // Instead of console.log, use server logger.
 export const logger = server.log;

@@ -25,7 +25,52 @@ export default class Troll extends Enemy {
     return { character, cell };
   }
 
-  calculateMovement(): void {
-    // TODO --> Implement Dijkstra algorithm
+  async calculateMovement(): Promise<void> {
+    try {
+      await this.keepMoving();
+    } catch (_error) {
+      let flag = false;
+      while (!flag) {
+        try {
+          await this.moveRandomDirection();
+          flag = true;
+        } catch (_err) {}
+      }
+    }
+  }
+
+  private async moveRandomDirection(): Promise<void> {
+    const random = Math.floor(Math.random() * 4);
+    switch (random) {
+      case 0:
+        await this.moveDown();
+        break;
+      case 1:
+        await this.moveUp();
+        break;
+      case 2:
+        await this.moveLeft();
+        break;
+      case 3:
+        await this.moveRight();
+        break;
+    }
+  }
+
+  private async keepMoving(): Promise<void> {
+    switch (this.orientation) {
+      case 'down':
+        await this.moveDown();
+        break;
+      case 'up':
+        await this.moveUp();
+        break;
+      case 'left':
+        await this.moveLeft();
+        break;
+      case 'right':
+        await this.moveRight();
+        break;
+    }
   }
 }
