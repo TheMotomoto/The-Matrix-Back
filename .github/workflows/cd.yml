@@ -66,4 +66,4 @@ jobs:
           app-name: 'bad-ice-cream-back'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AzureAppService_PublishProfile }} #AzureAppService_PublishProfile_1158f403b8f047c2840d8a2558051b32
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_3E7D72616C54409381AB1BF23A7C24B0 }}
