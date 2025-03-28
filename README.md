@@ -1,5 +1,5 @@
 # Bad-IceCream
-Repo for Bad-IceCream
+Repo for Bad-IceCream 
 
 ### To create this scaffold, I used the following command:
 _Powershell Windows 11_
