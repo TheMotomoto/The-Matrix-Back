@@ -67,3 +67,5 @@ jobs:
           slot-name: 'Production'
           package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_8F2CC811A03E471D8ED2DB8533CA02F6 }}
+          removeAdditionalFilesFlag: true
+          takeAppOfflineFlag: true
