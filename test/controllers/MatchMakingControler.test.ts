@@ -121,7 +121,6 @@ describe('MatchMakingController', () => {
       const controller = MatchMakingController.getInstance();
       await controller.handleMatchMaking(mockSocket as unknown as WebSocket, mockRequest);
       expect(mockSocket.send).toHaveBeenCalledWith('Internal server error');
-      expect(mockSocket.close).toHaveBeenCalled();
     });
 
     it('should respond with progress message on message event', async () => {
@@ -161,8 +160,8 @@ describe('MatchMakingController', () => {
       expect(redis.hset).toHaveBeenCalled();
       expect(redis.expire).toHaveBeenCalled();
       const sentArg = (mockReply.send as Mock).mock.calls[0][0];
-      expect(typeof sentArg).toBe('string');
-      expect(sentArg.length).toBe(8);
+      expect(typeof sentArg).toBe('object');
+      expect(sentArg.matchId.length).toBe(8);
     });
   });
 

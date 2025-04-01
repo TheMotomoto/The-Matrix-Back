@@ -17,7 +17,7 @@ export default class UserController {
   public async handleCreateUser(_req: FastifyRequest, res: FastifyReply): Promise<void> {
     const userId: string = uuidv4();
     await redis.hset(`users:${userId}`, 'id', userId);
-    await redis.expire(`users:${userId}`, 2 * 60 * 60);
+    await redis.expire(`users:${userId}`, 10 * 60);
     return res.send({ userId });
   }
 

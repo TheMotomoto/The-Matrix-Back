@@ -33,6 +33,8 @@ export default class MatchMakingController {
 
       const match = validateMatchDetails(await redis.hgetall(`matches:${matchIdParsed}`));
 
+      if (match.started) throw new MatchError(MatchError.MATCH_ALREADY_STARTED);
+
       websocketService.registerConnection(match.host, socket);
 
       socket.send('Connected and looking for a match...');
@@ -70,6 +72,9 @@ export default class MatchMakingController {
     if (Object.keys(user).length === 0) {
       throw new MatchError(MatchError.PLAYER_NOT_FOUND);
     }
+    if (user.match && Object.keys(user.match).length !== 0) {
+      throw new MatchError(MatchError.PLAYER_ALREADY_IN_MATCH);
+    }
     const matchInputDTO = validateMatchInputDTO(req.body as string);
     const matchDetails: MatchDetails = {
       id: uuidv4().replace(/-/g, '').slice(0, 8),
@@ -91,9 +96,9 @@ export default class MatchMakingController {
       matchDetails.map
     );
 
-    redis.expire(`matches:${matchDetails.id}`, 1 * 60 * 60);
+    redis.expire(`matches:${matchDetails.id}`, 10 * 60);
     redis.hset(`users:${userIdParsed}`, 'match', matchDetails.id);
-    return res.send(matchDetails.id);
+    return res.send({ matchId: matchDetails.id });
   }
 
   public async handleGetMatch(req: FastifyRequest, res: FastifyReply): Promise<void> {

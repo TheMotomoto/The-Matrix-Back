@@ -47,7 +47,7 @@ export const handleError = (error: unknown, _request: FastifyRequest, response: 
       });
     }
 
-    return response.status(500).send({
+    return response.status(400).send({
       statusCode: 400,
       message: 'Bad request',
     });
