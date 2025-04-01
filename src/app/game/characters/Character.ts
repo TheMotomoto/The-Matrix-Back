@@ -19,6 +19,10 @@ abstract class Character extends BoardItem {
     });
   }
 
+  public changeOrientation(orientation: 'down' | 'up' | 'left' | 'right'): void {
+    this.orientation = orientation;
+  }
+
   async moveDown(): Promise<void> {
     await this.mutex.runExclusive(() => {
       const cellDown = this.cell.getDownCell();

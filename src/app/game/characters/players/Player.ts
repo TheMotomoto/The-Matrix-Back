@@ -11,7 +11,7 @@ import Character from '../Character.js';
  */
 class Player extends Character {
   getDTO(): BoardItemDTO {
-    return { type: 'player', id: this.id };
+    return { type: 'player', id: this.id, orientation: this.orientation };
   }
   private id: string;
   /**

@@ -156,8 +156,13 @@ export default class BoardDifficulty1 extends Board {
     };
   }
 
-  private cellsBoardDTO(): CellDTO[][] {
-    return this.board.map((row) => row.map((cell) => cell.getCellDTO()));
+  private cellsBoardDTO(): CellDTO[] {
+    return this.board.flatMap(
+      (row) =>
+        row
+          .map((cell) => cell.getCellDTO())
+          .filter((cellDTO): cellDTO is CellDTO => cellDTO !== null) // Filtra celdas nulas
+    );
   }
 
   protected setUpInmovableObjects(): void {
