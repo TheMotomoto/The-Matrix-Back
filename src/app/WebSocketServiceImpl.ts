@@ -1,6 +1,6 @@
 import { WebSocket } from 'ws';
 import type { MatchDetails } from '../schemas/zod.js';
-import { logger } from '../server.js';
+import { logger, redis } from '../server.js';
 import type Match from './game/match/Match.js';
 import type MatchMakingService from './lobbies/services/MatchMakingService.js';
 import MatchMaking from './lobbies/services/MatchmakingImpl.js';
@@ -28,7 +28,6 @@ export default class WebsocketService {
 
   public removeConnection(userId: string): void {
     this.connections.delete(userId);
-    this.broadcastSystemMessage(`Usuario ${userId} se ha desconectado`);
   }
 
   // Enviar un mensaje del sistema a todos los usuarios
@@ -50,15 +49,19 @@ export default class WebsocketService {
     this.matchMakingService.searchMatch(match);
   }
 
-  public async notifyMatchFound(match: Match): Promise<void> {
+  public async notifyMatchFound(match: Match, ghostMatch: string): Promise<void> {
     try {
       const hostSocket = this.connections.get(match.getHost());
       const guestSocket = this.connections.get(match.getGuest());
       if (hostSocket && guestSocket) {
         hostSocket.send(JSON.stringify({ message: 'match-found', match: match.getMatchDTO() }));
         guestSocket.send(JSON.stringify({ message: 'match-found', match: match.getMatchDTO() }));
-        this.connections.delete(match.getHost());
-        this.connections.delete(match.getGuest());
+        this.connections.get(match.getGuest())?.close();
+        this.connections.get(match.getHost())?.close();
+        this.removeConnection(match.getHost());
+        this.removeConnection(match.getGuest());
+        redis.hset(`matches:${match.getId()}`, 'started', 'true');
+        redis.del(`matches:${ghostMatch}`);
       } else {
         // TODO --> implement reconnect logic // Priority 2 NOT MVP
         throw new Error('One of the players is not connected');

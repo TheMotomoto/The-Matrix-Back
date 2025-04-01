@@ -109,7 +109,7 @@ describe('MatchMakingController', () => {
       expect(validateString).toHaveBeenCalledWith('user123');
       expect(validateMatchDetails).toHaveBeenCalled();
       expect(mockWebSocketService.registerConnection).toHaveBeenCalledWith('user123', mockSocket);
-      expect(mockSocket.send).toHaveBeenCalledWith('Connected and looking for a match...');
+      expect(mockSocket.send).toHaveBeenCalledWith(JSON.stringify({ message: 'Connected and looking for a match...'}));
       expect(mockWebSocketService.matchMaking).toHaveBeenCalledWith(validMatchDetails);
       expect(mockSocket.on).toHaveBeenCalledWith('message', expect.any(Function));
       expect(mockSocket.on).toHaveBeenCalledWith('close', expect.any(Function));
@@ -120,8 +120,7 @@ describe('MatchMakingController', () => {
       (validateString as Mock).mockImplementation(() => { throw new Error('Invalid'); });
       const controller = MatchMakingController.getInstance();
       await controller.handleMatchMaking(mockSocket as unknown as WebSocket, mockRequest);
-      expect(mockSocket.send).toHaveBeenCalledWith('Internal server error');
-      expect(mockSocket.close).toHaveBeenCalled();
+      expect(mockSocket.send).toHaveBeenCalledWith(JSON.stringify({message: 'Internal server error'}));
     });
 
     it('should respond with progress message on message event', async () => {
@@ -129,7 +128,7 @@ describe('MatchMakingController', () => {
       await controller.handleMatchMaking(mockSocket as unknown as WebSocket, mockRequest);
       if (messageHandler) {
         messageHandler(Buffer.from('any message'));
-        expect(mockSocket.send).toHaveBeenCalledWith('Matchmaking in progress...');
+        expect(mockSocket.send).toHaveBeenCalledWith(JSON.stringify({message:'Matchmaking in progress...'}));
       } else {
         throw new Error('Message handler not registered');
       }
@@ -161,8 +160,8 @@ describe('MatchMakingController', () => {
       expect(redis.hset).toHaveBeenCalled();
       expect(redis.expire).toHaveBeenCalled();
       const sentArg = (mockReply.send as Mock).mock.calls[0][0];
-      expect(typeof sentArg).toBe('string');
-      expect(sentArg.length).toBe(8);
+      expect(typeof sentArg).toBe('object');
+      expect(sentArg.matchId.length).toBe(8);
     });
   });
 

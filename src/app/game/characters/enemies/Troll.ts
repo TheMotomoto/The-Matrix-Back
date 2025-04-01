@@ -6,7 +6,7 @@ import Enemy from './Enemy.js';
 
 export default class Troll extends Enemy {
   getDTO(): BoardItemDTO {
-    return { type: 'troll' };
+    return { type: 'troll', orientation: this.orientation };
   }
   protected move(cellUp: Cell, character: Character | null): void {
     this.cell.setCharacter(null);

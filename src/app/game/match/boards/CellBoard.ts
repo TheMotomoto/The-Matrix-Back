@@ -86,7 +86,8 @@ class Cell {
     this.item?.pick();
   }
 
-  public getCellDTO(): CellDTO {
+  public getCellDTO(): CellDTO | null {
+    if (!this.item && !this.character) return null;
     return {
       x: this.xPosition,
       y: this.yPosition,

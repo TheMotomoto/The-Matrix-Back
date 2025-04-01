@@ -27,10 +27,24 @@ const validateMatchDetails = (data: unknown): MatchDetails => {
       return val;
     }, z.number().nonnegative()),
     map: z.string().nonempty(),
+    started: z.preprocess((val) => {
+      if (typeof val === 'string') {
+        const parsed = Boolean(val);
+        return parsed;
+      }
+      return val;
+    }, z.boolean().optional()),
   });
   return schema.parse(data);
 };
 
+const validateUserQueue = (data: unknown): UserQueue => {
+  const schema = z.object({
+    id: z.string().nonempty(),
+    matchId: z.string().nonempty(),
+  });
+  return schema.parse(data);
+};
 const validateGameMessage = (data: unknown): GameMessage => {
   const schema = z.object({
     type: z.string().nonempty(),
@@ -49,6 +63,7 @@ interface MatchDetails {
   guest?: string | null;
   level: number;
   map: string;
+  started?: boolean;
 }
 interface BoardDTO {
   host: string | null;
@@ -59,7 +74,7 @@ interface BoardDTO {
   fruitsCoordinates: number[][];
   fruits: number;
   playersStartCoordinates: number[][];
-  board: CellDTO[][];
+  board: CellDTO[];
 }
 interface CellDTO {
   x: number;
@@ -70,6 +85,7 @@ interface CellDTO {
 interface BoardItemDTO {
   type: string;
   id?: string;
+  orientation?: string;
 }
 interface CellCoordinates {
   x: number;
@@ -87,6 +103,10 @@ interface GameMessage {
   type: string;
   payload: string;
 }
+interface UserQueue {
+  id: string;
+  matchId: string;
+}
 
 export type {
   MatchInputDTO,
@@ -98,5 +118,12 @@ export type {
   CellCoordinates,
   MatchDTO,
   GameMessage,
+  UserQueue,
 };
-export { validateMatchInputDTO, validateMatchDetails, validateString, validateGameMessage };
+export {
+  validateMatchInputDTO,
+  validateMatchDetails,
+  validateString,
+  validateGameMessage,
+  validateUserQueue,
+};
