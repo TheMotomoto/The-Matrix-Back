@@ -37,15 +37,17 @@ export default class MatchMakingController {
 
       websocketService.registerConnection(match.host, socket);
 
-      socket.send('Connected and looking for a match...');
+      socket.send(JSON.stringify({ message: 'Connected and looking for a match...' }));
 
       websocketService.matchMaking(match);
 
       logger.info(`Matchmaking from ${match.host}: looking for Match: ${JSON.stringify(match)}`);
 
-      // Handle incoming messages
+      // Extend the expiration time of the match and user in Redis
       socket.on('message', (_message: Buffer) => {
-        socket.send('Matchmaking in progress...');
+        socket.send(JSON.stringify({ message: 'Matchmaking in progress...' }));
+        redis.expire(`matches:${matchIdParsed}`, 10 * 60);
+        redis.expire(`users:${match.host}`, 10 * 60);
       });
 
       socket.on('close', () => {
@@ -59,7 +61,7 @@ export default class MatchMakingController {
     } catch (error) {
       logger.warn('An error occurred on web scoket controller...');
       logger.error(error);
-      socket.send('Internal server error');
+      socket.send(JSON.stringify({ message: 'Internal server error' }));
       socket.close();
       return;
     }
