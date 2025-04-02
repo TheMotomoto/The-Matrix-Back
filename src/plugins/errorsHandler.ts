@@ -29,6 +29,7 @@ export const handleError = (error: unknown, _request: FastifyRequest, response: 
 
   // An error from customized error class
   if (error instanceof ErrorTemplate) {
+    if(error.code === 401 || error.code === 403) return response.status(error.code).send('Unauthorized');
     return response
       .status(error.code)
       .header('Content-Type', 'application/json')
