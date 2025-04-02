@@ -35,7 +35,6 @@ export const handleError = (error: unknown, _request: FastifyRequest, response: 
       .header('Content-Type', 'application/json')
       .send(JSON.stringify({
         statusCode: error.code,
-        message: error.message,
       }));
   }
 
