@@ -29,7 +29,7 @@ export const handleError = (error: unknown, _request: FastifyRequest, response: 
 
   // An error from customized error class
   if (error instanceof ErrorTemplate) {
-    return response.status(error.code).WriteHead(error.code, { 'Content-Type': 'application/json' }).send(JSON.stringify({
+    return response.WriteHead(error.code, { 'Content-Type': 'application/json' }).send(JSON.stringify({
       statusCode: error.code,
       message: error.message,
     }));
