@@ -32,10 +32,10 @@ export const handleError = (error: unknown, _request: FastifyRequest, response: 
     return response
       .status(error.code)
       .header('Content-Type', 'application/json')
-      .send({
+      .send(JSON.stringify({
         statusCode: error.code,
         message: error.message,
-      });
+      }));
   }
 
   return response.status(500).send({
