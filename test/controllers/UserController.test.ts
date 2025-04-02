@@ -35,6 +35,9 @@ describe('UserController', () => {
       send: vi.fn(),
     } as unknown as FastifyReply;
 
+    res.status = vi.fn( () => res);
+    res.header = vi.fn( () => res);
+
     controller = UserController.getInstance();
   });
 
@@ -53,8 +56,7 @@ describe('UserController', () => {
   describe('handleGetUser', () => {
     it('should validate the userId, retrieve the user from Redis and send the user object', async () => {
       await controller.handleGetUser(req, res);
-
-      expect(res.send).toHaveBeenCalledWith({ id: 'fixed-uuid', name: 'Test User' });
+      expect(res.send).toHaveBeenCalledWith(JSON.stringify({ id: 'fixed-uuid', name: 'Test User' }));
     });
   });
 
