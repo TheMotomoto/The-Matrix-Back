@@ -25,7 +25,10 @@ export default class UserController {
     const { userId } = req.params as { userId: string };
     const parsedId = validateString(userId);
     const user = await redis.hgetall(`users:${parsedId}`);
-    return res.WriteHead(200, {"Content-Type":"application/json"}).send(JSON.stringify(user));
+    return res
+      .code(200)
+      .header("Content-Type", "application/json")
+      .send(JSON.stringify(user));
   }
 
   public async handleGetUsers(_req: FastifyRequest, res: FastifyReply): Promise<void> {
